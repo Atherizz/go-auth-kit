@@ -22,10 +22,7 @@ func main() {
 	categoryService := service.NewCategoryService(categoryRepository, db, validate)
 	categoryController := controller.NewCategoryController(categoryService)
 
-
 	router := app.NewRouter(categoryController)
-
-
 	middleware := middleware.NewAuthMiddleware(router)
 
 	server := http.Server{
