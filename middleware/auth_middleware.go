@@ -6,17 +6,18 @@ import (
 	"net/http"
 )
 
-type AuthMiddlaware struct {
+type AuthMiddleware struct {
 	Handler http.Handler
 }
 
-func NewAuthMiddleware(handler http.Handler) *AuthMiddlaware {
-	return &AuthMiddlaware{
+
+func NewAuthMiddleware(handler http.Handler) *AuthMiddleware {
+	return &AuthMiddleware{
 		Handler: handler,
 	}
 }
 
-func (middleware AuthMiddlaware) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+func (middleware AuthMiddleware) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	key := "password"
 	if key == request.Header.Get("X-API-KEY") {
 		middleware.Handler.ServeHTTP(writer, request)
