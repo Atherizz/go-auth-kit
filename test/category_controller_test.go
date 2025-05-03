@@ -37,7 +37,7 @@ type responseBody struct {
 }
 
 func setupTestDB() *sql.DB {
-	db, err := sql.Open("mysql", "root@tcp(localhost:3306)/golang_restful_api_test")
+	db, err := sql.Open("mysql", "root@tcp(localhost:3306)/golang_migrations")
 	helper.PanicError(err)
 
 	db.SetMaxIdleConns(5)
@@ -62,7 +62,7 @@ func setupRouter(db *sql.DB) http.Handler {
 }
 
 func truncateData(db *sql.DB) {
-	db.Exec("TRUNCATE category")
+	db.Exec("TRUNCATE categories")
 }
 
 func TestCreateCategorySuccess(t *testing.T) {

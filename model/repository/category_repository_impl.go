@@ -16,7 +16,7 @@ func NewCategoryRepository() *CategoryRepositoryImpl {
 }
 
 func (repo *CategoryRepositoryImpl) Create(ctx context.Context, tx *sql.Tx, category entity.Category) entity.Category {
-	script := "INSERT INTO category(name) VALUES (?)"
+	script := "INSERT INTO categories(name) VALUES (?)"
 	result, err := tx.ExecContext(ctx, script, category.Name)
 	helper.PanicError(err)
 
@@ -28,7 +28,7 @@ func (repo *CategoryRepositoryImpl) Create(ctx context.Context, tx *sql.Tx, cate
 }
 
 func (repo *CategoryRepositoryImpl) GetAll(ctx context.Context, tx *sql.Tx) []entity.Category {
-	script := "SELECT * FROM category"
+	script := "SELECT * FROM categories"
 	result, err := tx.QueryContext(ctx, script)
 	helper.PanicError(err)
 
@@ -47,7 +47,7 @@ func (repo *CategoryRepositoryImpl) GetAll(ctx context.Context, tx *sql.Tx) []en
 }
 
 func (repo *CategoryRepositoryImpl) GetById(ctx context.Context, tx *sql.Tx, id int) (entity.Category, error) {
-	script := "SELECT * FROM category WHERE id = (?)"
+	script := "SELECT * FROM categories WHERE id = (?)"
 	result, err := tx.QueryContext(ctx, script, id)
 	helper.PanicError(err)
 
@@ -64,7 +64,7 @@ func (repo *CategoryRepositoryImpl) GetById(ctx context.Context, tx *sql.Tx, id 
 }
 
 func (repo *CategoryRepositoryImpl) Search(ctx context.Context, tx *sql.Tx, keyword string) ([]entity.Category, error) {
-	script := "SELECT * FROM category WHERE name LIKE (?)"
+	script := "SELECT * FROM categories WHERE name LIKE (?)"
 	param := "%" + keyword + "%"
 	result, err := tx.QueryContext(ctx, script, param)
 	helper.PanicError(err)
@@ -87,7 +87,7 @@ func (repo *CategoryRepositoryImpl) Search(ctx context.Context, tx *sql.Tx, keyw
 }
 
 func (repo *CategoryRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, id int, name string) (entity.Category, error) {
-	script := "UPDATE category SET name = ? WHERE id = ?"
+	script := "UPDATE categories SET name = ? WHERE id = ?"
 	result, err := tx.ExecContext(ctx, script, name, id)
 	helper.PanicError(err)
 
@@ -103,7 +103,7 @@ func (repo *CategoryRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, id i
 }
 
 func (repo *CategoryRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, id int32) error {
-	script := "DELETE FROM category WHERE id = ?"
+	script := "DELETE FROM categories WHERE id = ?"
 	result, err := tx.ExecContext(ctx, script, id)
 	helper.PanicError(err)
 
