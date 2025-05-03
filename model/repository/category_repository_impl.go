@@ -71,7 +71,6 @@ func (repo *CategoryRepositoryImpl) Search(ctx context.Context, tx *sql.Tx, keyw
 
 	defer result.Close()
 
-
 	var categories []entity.Category
 	for result.Next() {
 		category := entity.Category{}
@@ -81,7 +80,7 @@ func (repo *CategoryRepositoryImpl) Search(ctx context.Context, tx *sql.Tx, keyw
 	}
 
 	if len(categories) == 0 {
-	return categories, errors.New("No Data Found")
+		return categories, errors.New("No Data Found")
 	}
 
 	return categories, nil
