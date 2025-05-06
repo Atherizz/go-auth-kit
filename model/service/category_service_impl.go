@@ -8,25 +8,28 @@ import (
 	"golang-restful-api/model/helper"
 	"golang-restful-api/model/repository"
 	"golang-restful-api/model/web"
+	"log"
 
 	"github.com/go-playground/validator/v10"
 )
 
-type CategoryServiceImpl struct {
-	CategoryRepository repository.CategoryRepository
-	DB                 *sql.DB
-	Validate           *validator.Validate
+type ServiceImpl[T web.EntityRequest, S entity.NamedEntity, R web.EntityResponse] struct {
+	Repository          repository.Repository[S]
+	DB                  *sql.DB
+	Validate            *validator.Validate
+	ResponseConstructor func() R
 }
 
-func NewCategoryService(categoryRepository repository.CategoryRepository, db *sql.DB, validate *validator.Validate) *CategoryServiceImpl {
-	return &CategoryServiceImpl{
-		CategoryRepository: categoryRepository,
-		DB:                 db,
-		Validate:           validate,
+func NewService[T web.EntityRequest, S entity.NamedEntity, R web.EntityResponse](categoryRepository repository.Repository[S], db *sql.DB, validate *validator.Validate, constructor func() R) *ServiceImpl[T, S, R] {
+	return &ServiceImpl[T, S, R]{
+		Repository:          categoryRepository,
+		DB:                  db,
+		Validate:            validate,
+		ResponseConstructor: constructor,
 	}
 }
 
-func (service *CategoryServiceImpl) Create(ctx context.Context, request web.CategoryCreateRequest) web.CategoryResponse {
+func (service *ServiceImpl[T, S, R]) Create(ctx context.Context, request T, model S) R {
 	err := service.Validate.Struct(request)
 	helper.PanicError(err)
 
@@ -34,99 +37,103 @@ func (service *CategoryServiceImpl) Create(ctx context.Context, request web.Cate
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
 
-	category := entity.Category{
-		Name: request.Name,
-	}
+	log.Printf("Creating: %+v\n", request)
+	model.SetName(request.GetName())
 
-	category = service.CategoryRepository.Create(ctx, tx, category)
+	modelResult := service.Repository.Create(ctx, tx, model)
+	log.Printf("Created model: %+v\n", modelResult)
 
-	return helper.ToCategoryResponse(category)
+	result := helper.ToCategoryResponse[S, R](modelResult, service.ResponseConstructor)
+	log.Printf("Converted response: %+v\n", result)
 
+	return result
 }
 
-func (service *CategoryServiceImpl) Update(ctx context.Context, id int, name string) web.CategoryResponse {
+func (service *ServiceImpl[T, S, R]) Update(ctx context.Context, request T, model S) R {
 
-	errValidate := service.Validate.Var(name, "required,min=1,max=200")
+	errValidate := service.Validate.Var(request.GetName(), "required,min=1,max=200")
 	helper.PanicError(errValidate)
 
 	tx, err := service.DB.Begin()
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
 
-	_, err = service.CategoryRepository.GetById(ctx, tx, id)
+	_, err = service.Repository.GetById(ctx, tx, request.GetId(), model)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
-	category, err := service.CategoryRepository.Update(ctx, tx, id, name)
+	model.SetName(request.GetName())
+
+	modelResult, err := service.Repository.Update(ctx, tx, model)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
-	return helper.ToCategoryResponse(category)
-
+	result := helper.ToCategoryResponse[S, R](modelResult, service.ResponseConstructor)
+	return result
 }
 
-func (service *CategoryServiceImpl) FindById(ctx context.Context, id int) web.CategoryResponse {
+func (service *ServiceImpl[T, S, R]) FindById(ctx context.Context, id int, request T, model S) R {
 	tx, err := service.DB.Begin()
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
 
-	category, err := service.CategoryRepository.GetById(ctx, tx, id)
+	modelResult, err := service.Repository.GetById(ctx, tx, id, model)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
-	return helper.ToCategoryResponse(category)
-
+	result := helper.ToCategoryResponse[S, R](modelResult, service.ResponseConstructor)
+	return result
 }
 
-func (service *CategoryServiceImpl) Search(ctx context.Context, keyword string) []web.CategoryResponse {
+func (service *ServiceImpl[T, S, R]) Search(ctx context.Context, keyword string, request T, model S) []R {
 	tx, err := service.DB.Begin()
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
 
-	categories, err := service.CategoryRepository.Search(ctx, tx, keyword)
+	datas, err := service.Repository.Search(ctx, tx, keyword, model)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}
-	
-	var categoriesResponse []web.CategoryResponse
 
-	for _, category := range categories {
-		categoriesResponse = append(categoriesResponse, helper.ToCategoryResponse(category))
+	var categoriesResponse []R
+
+	for _, data := range datas {
+		categoryResponse := helper.ToCategoryResponse[S, R](data, service.ResponseConstructor)
+		categoriesResponse = append(categoriesResponse, categoryResponse)
+	}
+
+	return categoriesResponse
+}
+
+func (service *ServiceImpl[T, S, R]) Show(ctx context.Context, request T, model S) []R {
+	tx, err := service.DB.Begin()
+	helper.PanicError(err)
+	defer helper.CommitOrRollback(tx)
+
+	datas := service.Repository.GetAll(ctx, tx, model)
+	var categoriesResponse []R
+
+	for _, data := range datas {
+		categoryResponse := helper.ToCategoryResponse[S, R](data, service.ResponseConstructor)
+		categoriesResponse = append(categoriesResponse, categoryResponse)
 	}
 
 	return categoriesResponse
 
-
 }
 
-func (service *CategoryServiceImpl) Show(ctx context.Context) []web.CategoryResponse {
+func (service *ServiceImpl[T, S, R]) Delete(ctx context.Context, id int, model S) error {
 	tx, err := service.DB.Begin()
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
 
-	categories := service.CategoryRepository.GetAll(ctx, tx)
-	var categoriesResponse []web.CategoryResponse
-
-	for _, category := range categories {
-		categoriesResponse = append(categoriesResponse, helper.ToCategoryResponse(category))
-	}
-
-	return categoriesResponse
-
-}
-
-func (service *CategoryServiceImpl) Delete(ctx context.Context, id int) error {
-	tx, err := service.DB.Begin()
-	helper.PanicError(err)
-	defer helper.CommitOrRollback(tx)
-
-	_, err = service.CategoryRepository.GetById(ctx, tx, id)
+	_, err = service.Repository.GetById(ctx, tx, id, model)
 	helper.PanicError(err)
 
-	err = service.CategoryRepository.Delete(ctx, tx, int32(id))
+	err = service.Repository.Delete(ctx, tx, int32(id))
 	if err != nil {
 		return err
 	}

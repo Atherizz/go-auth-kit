@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"golang-restful-api/model/entity"
 	"golang-restful-api/model/helper"
 	"golang-restful-api/model/service"
 	"golang-restful-api/model/web"
@@ -11,63 +12,67 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-type CategoryControllerImpl struct {
-	CategoryService service.CategoryService
+type ControllerImpl[T web.EntityRequest, S entity.NamedEntity, R web.EntityResponse] struct {
+	CategoryService service.Service[T,S,R]
+	Request        T
+	Model           S
+
 }
 
-func NewCategoryController(categoryService service.CategoryService) *CategoryControllerImpl {
-	return &CategoryControllerImpl{
+func NewController[T web.EntityRequest, S entity.NamedEntity, R web.EntityResponse](categoryService service.Service[T,S,R], request T, model S) *ControllerImpl[T,S,R] {
+	return &ControllerImpl[T,S,R]{
 		CategoryService: categoryService,
+		Request: request,
+		Model: model,
 	}
 }
 
-func (controller *CategoryControllerImpl) Create(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (controller *ControllerImpl[T, S,R]) Create(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	decoder := json.NewDecoder(request.Body)
+	createRequest := controller.Request
+	err := decoder.Decode(&createRequest)
+	helper.PanicError(err)
+
+	dataResponse := controller.CategoryService.Create(request.Context(), createRequest, controller.Model)
+	webResponse := web.WebResponse{
+		Code:   200,
+		Status: "OK",
+		Data:   dataResponse,
+	}
+
+	helper.WriteEncodeResponse(writer, webResponse)
+
+}
+
+func (controller *ControllerImpl[T, S, R]) Update(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 
 	decoder := json.NewDecoder(request.Body)
-	categoryCreateRequest := web.CategoryCreateRequest{}
-	err := decoder.Decode(&categoryCreateRequest)
-	helper.PanicError(err)
-
-	categoryResponse := controller.CategoryService.Create(request.Context(), categoryCreateRequest)
-	webResponse := web.WebResponse{
-		Code:   200,
-		Status: "OK",
-		Data:   categoryResponse,
-	}
-
-	helper.WriteEncodeResponse(writer, webResponse)
-
-}
-
-func (controller *CategoryControllerImpl) Update(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-
-	decoder := json.NewDecoder(request.Body)
-	categoryUpdateRequest := web.CategoryUpdateRequest{}
-	err := decoder.Decode(&categoryUpdateRequest)
+	updateRequest := controller.Request
+	err := decoder.Decode(&updateRequest)
 	helper.PanicError(err)
 
 	categoryId := params.ByName("categoryId")
 	id, err := strconv.Atoi(categoryId)
 	helper.PanicError(err)
-	categoryUpdateRequest.Id = id
+	updateRequest.SetId(id)
 
-	categoryResponse := controller.CategoryService.Update(request.Context(), categoryUpdateRequest.Id, categoryUpdateRequest.Name)
+	dataResponse := controller.CategoryService.Update(request.Context(), controller.Request, controller.Model)
 	webResponse := web.WebResponse{
 		Code:   200,
 		Status: "OK",
-		Data:   categoryResponse,
+		Data:   dataResponse,
 	}
 
 	helper.WriteEncodeResponse(writer, webResponse)
 }
 
-func (controller *CategoryControllerImpl) Delete(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (controller *ControllerImpl[T, S, R]) Delete(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 
 	categoryId := params.ByName("categoryId")
 	id, err := strconv.Atoi(categoryId)
 	helper.PanicError(err)
 
-	controller.CategoryService.Delete(request.Context(), id)
+	controller.CategoryService.Delete(request.Context(), id, controller.Model)
 	webResponse := web.WebResponse{
 		Code:   200,
 		Status: "OK",
@@ -76,13 +81,13 @@ func (controller *CategoryControllerImpl) Delete(writer http.ResponseWriter, req
 	helper.WriteEncodeResponse(writer, webResponse)
 }
 
-func (controller *CategoryControllerImpl) FindById(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (controller *ControllerImpl[T, S, R]) FindById(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 
 	categoryId := params.ByName("categoryId")
 	id, err := strconv.Atoi(categoryId)
 	helper.PanicError(err)
 
-	categoryResponse := controller.CategoryService.FindById(request.Context(), id)
+	categoryResponse := controller.CategoryService.FindById(request.Context(), id, controller.Request, controller.Model)
 	webResponse := web.WebResponse{
 		Code:   200,
 		Status: "OK",
@@ -92,28 +97,27 @@ func (controller *CategoryControllerImpl) FindById(writer http.ResponseWriter, r
 	helper.WriteEncodeResponse(writer, webResponse)
 }
 
-
-func (controller *CategoryControllerImpl) FindAll(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (controller *ControllerImpl[T, S,R]) FindAll(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 
 	keyword := request.URL.Query().Get("search")
 
-	if keyword ==  "" {
-		categoryResponses := controller.CategoryService.Show(request.Context())
+	if keyword == "" {
+		categoryResponses := controller.CategoryService.Show(request.Context(), controller.Request, controller.Model)
 		webResponse := web.WebResponse{
 			Code:   200,
 			Status: "OK",
 			Data:   categoryResponses,
 		}
-	
+
 		helper.WriteEncodeResponse(writer, webResponse)
 	} else {
-		categoryResponses := controller.CategoryService.Search(request.Context(), keyword)
+		categoryResponses := controller.CategoryService.Search(request.Context(), keyword, controller.Request, controller.Model)
 		webResponse := web.WebResponse{
 			Code:   200,
 			Status: "OK",
 			Data:   categoryResponses,
 		}
-	
+
 		helper.WriteEncodeResponse(writer, webResponse)
 	}
 

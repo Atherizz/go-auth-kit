@@ -10,7 +10,6 @@ type AuthMiddleware struct {
 	Handler http.Handler
 }
 
-
 func NewAuthMiddleware(handler http.Handler) *AuthMiddleware {
 	return &AuthMiddleware{
 		Handler: handler,
@@ -33,3 +32,15 @@ func (middleware AuthMiddleware) ServeHTTP(writer http.ResponseWriter, request *
 
 	}
 }
+
+// func RecoveryMiddleware(next http.Handler) http.Handler {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		defer func() {
+// 			if err := recover(); err != nil {
+// 				http.Error(w, fmt.Sprintf("Internal Server Error: %v", err), http.StatusInternalServerError)
+// 				log.Printf("Panic recovered: %v\n", err)
+// 			}
+// 		}()
+// 		next.ServeHTTP(w, r)
+// 	})
+// }

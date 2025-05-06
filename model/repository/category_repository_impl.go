@@ -8,36 +8,36 @@ import (
 	"golang-restful-api/model/helper"
 )
 
-type CategoryRepositoryImpl struct {
+type RepositoryImpl[T entity.NamedEntity] struct {
 }
 
-func NewCategoryRepository() *CategoryRepositoryImpl {
-	return &CategoryRepositoryImpl{}
+func NewRepository[T entity.NamedEntity]() *RepositoryImpl[T] {
+	return &RepositoryImpl[T]{}
 }
 
-func (repo *CategoryRepositoryImpl) Create(ctx context.Context, tx *sql.Tx, category entity.Category) entity.Category {
-	script := "INSERT INTO categories(name) VALUES (?)"
-	result, err := tx.ExecContext(ctx, script, category.Name)
+func (repo *RepositoryImpl[T]) Create(ctx context.Context, tx *sql.Tx, model T) T {
+	script := "INSERT INTO category(name) VALUES (?)"
+	result, err := tx.ExecContext(ctx, script, model.GetName())
 	helper.PanicError(err)
 
 	id, err := result.LastInsertId()
 	helper.PanicError(err)
 
-	category.Id = int(id)
-	return category
+	model.SetId(int(id))
+	return model
 }
 
-func (repo *CategoryRepositoryImpl) GetAll(ctx context.Context, tx *sql.Tx) []entity.Category {
-	script := "SELECT * FROM categories"
+func (repo *RepositoryImpl[T]) GetAll(ctx context.Context, tx *sql.Tx, model T) []T {
+	script := "SELECT * FROM category"
 	result, err := tx.QueryContext(ctx, script)
 	helper.PanicError(err)
 
 	defer result.Close()
 
-	var categories []entity.Category
+	var categories []T
 	for result.Next() {
-		category := entity.Category{}
-		err := result.Scan(&category.Id, &category.Name)
+		category := model
+		err := result.Scan(category.GetId(), category.GetName)
 		helper.PanicError(err)
 
 		categories = append(categories, category)
@@ -46,16 +46,16 @@ func (repo *CategoryRepositoryImpl) GetAll(ctx context.Context, tx *sql.Tx) []en
 	return categories
 }
 
-func (repo *CategoryRepositoryImpl) GetById(ctx context.Context, tx *sql.Tx, id int) (entity.Category, error) {
-	script := "SELECT * FROM categories WHERE id = (?)"
+func (repo *RepositoryImpl[T]) GetById(ctx context.Context, tx *sql.Tx, id int, model T) (T, error) {
+	script := "SELECT * FROM category WHERE id = (?)"
 	result, err := tx.QueryContext(ctx, script, id)
 	helper.PanicError(err)
 
 	defer result.Close()
 
-	category := entity.Category{}
+	category := model
 	if result.Next() {
-		err := result.Scan(&category.Id, &category.Name)
+		err := result.Scan(category.GetId(), category.GetName())
 		helper.PanicError(err)
 		return category, nil
 	}
@@ -63,18 +63,18 @@ func (repo *CategoryRepositoryImpl) GetById(ctx context.Context, tx *sql.Tx, id 
 	return category, errors.New("ID not found")
 }
 
-func (repo *CategoryRepositoryImpl) Search(ctx context.Context, tx *sql.Tx, keyword string) ([]entity.Category, error) {
-	script := "SELECT * FROM categories WHERE name LIKE (?)"
+func (repo *RepositoryImpl[T]) Search(ctx context.Context, tx *sql.Tx, keyword string, model T) ([]T, error) {
+	script := "SELECT * FROM category WHERE name LIKE (?)"
 	param := "%" + keyword + "%"
 	result, err := tx.QueryContext(ctx, script, param)
 	helper.PanicError(err)
 
 	defer result.Close()
 
-	var categories []entity.Category
+	var categories []T
 	for result.Next() {
-		category := entity.Category{}
-		err := result.Scan(&category.Id, &category.Name)
+		category := model
+		err := result.Scan(category.GetId(), category.GetName())
 		helper.PanicError(err)
 		categories = append(categories, category)
 	}
@@ -86,24 +86,24 @@ func (repo *CategoryRepositoryImpl) Search(ctx context.Context, tx *sql.Tx, keyw
 	return categories, nil
 }
 
-func (repo *CategoryRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, id int, name string) (entity.Category, error) {
-	script := "UPDATE categories SET name = ? WHERE id = ?"
-	result, err := tx.ExecContext(ctx, script, name, id)
+func (repo *RepositoryImpl[T]) Update(ctx context.Context, tx *sql.Tx, model T) (T, error) {
+	script := "UPDATE category SET name = ? WHERE id = ?"
+	result, err := tx.ExecContext(ctx, script, model.GetName(), model.GetId())
 	helper.PanicError(err)
 
 	row, err := result.RowsAffected()
 	helper.PanicError(err)
 	if row == 0 {
-		return entity.Category{}, errors.New("no row affected")
+		return model, errors.New("no row affected")
 	}
 
-	category, _ := repo.GetById(ctx, tx, id)
-	return category, nil
+	res, _ := repo.GetById(ctx, tx, model.GetId(), model)
+	return res, nil
 
 }
 
-func (repo *CategoryRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, id int32) error {
-	script := "DELETE FROM categories WHERE id = ?"
+func (repo *RepositoryImpl[T]) Delete(ctx context.Context, tx *sql.Tx, id int32) error {
+	script := "DELETE FROM category WHERE id = ?"
 	result, err := tx.ExecContext(ctx, script, id)
 	helper.PanicError(err)
 

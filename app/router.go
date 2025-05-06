@@ -3,14 +3,15 @@ package app
 import (
 	"golang-restful-api/controller"
 	"golang-restful-api/exception"
+	"golang-restful-api/model/entity"
+	"golang-restful-api/model/web"
 	"net/http"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/julienschmidt/httprouter"
-
-
 )
 
-func NewRouter(categoryController controller.CategoryController) *httprouter.Router {
+func NewRouter(categoryController controller.Controller[web.EntityRequest, entity.NamedEntity, web.EntityResponse]) *httprouter.Router {
 	router := httprouter.New()
 
 	router.GET("/api/categories", categoryController.FindAll)
@@ -24,5 +25,5 @@ func NewRouter(categoryController controller.CategoryController) *httprouter.Rou
 	router.NotFound = http.HandlerFunc(exception.NotFoundRouteError)
 
 	return router
-	
+
 }

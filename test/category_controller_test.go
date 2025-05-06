@@ -12,6 +12,7 @@ import (
 	"golang-restful-api/model/helper"
 	"golang-restful-api/model/repository"
 	"golang-restful-api/model/service"
+	"golang-restful-api/model/web"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -39,7 +40,7 @@ type responseBody struct {
 func setupTestDB() *sql.DB {
 	db, err := sql.Open("mysql", "root@tcp(localhost:3306)/golang_migrations")
 	helper.PanicError(err)
-
+	
 	db.SetMaxIdleConns(5)
 	db.SetMaxOpenConns(20)
 	db.SetConnMaxLifetime(60 * time.Minute)
@@ -51,9 +52,9 @@ func setupTestDB() *sql.DB {
 func setupRouter(db *sql.DB) http.Handler {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 
-	categoryRepository := repository.NewCategoryRepository()
-	categoryService := service.NewCategoryService(categoryRepository, db, validate)
-	categoryController := controller.NewCategoryController(categoryService)
+	categoryRepository := repository.NewRepository[*entity.Category]()
+	categoryService := service.NewService[*web.CategoryUpdateRequest, *entity.Category](categoryRepository, db, validate)
+	categoryController := controller.NewController[*web.CategoryUpdateRequest, *entity.Category](categoryService, &web.CategoryUpdateRequest{}, &entity.Category{})
 
 	router := app.NewRouter(categoryController)
 
@@ -128,11 +129,11 @@ func TestUpdateCategorySuccess(t *testing.T) {
 	"name" : "gadget"
 	}`)
 
-	repo := repository.NewCategoryRepository()
+	repo := repository.NewRepository[*entity.Category]()
 	ctx := context.Background()
 
 	tx, _ := db.Begin()
-	newCategory := repo.Create(ctx, tx, entity.Category{
+	newCategory := repo.Create(ctx, tx, &entity.Category{
 		Name: "aksesoris",
 	})
 	tx.Commit()
@@ -193,8 +194,8 @@ func TestGetCategorySuccess(t *testing.T) {
 
 	ctx := context.Background()
 	tx, _ := db.Begin()
-	repo := repository.NewCategoryRepository()
-	category := repo.Create(ctx, tx, entity.Category{
+	repo := repository.NewRepository[*entity.Category]()
+	category := repo.Create(ctx, tx, &entity.Category{
 		Name: "Makanan",
 	})
 	tx.Commit()

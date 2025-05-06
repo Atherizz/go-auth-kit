@@ -4,13 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"golang-restful-api/model/entity"
+	// "golang-restful-api/model/entity"
 )
 
-type CategoryRepository interface {
-	Create(ctx context.Context, tx *sql.Tx, category entity.Category) entity.Category
-	GetAll(ctx context.Context, tx *sql.Tx) []entity.Category
-	GetById(ctx context.Context, tx *sql.Tx, id int) (entity.Category, error)
-	Update(ctx context.Context, tx *sql.Tx, id int, name string) (entity.Category, error)
-	Delete(ctx context.Context, tx *sql.Tx, id int32) (error)
-	Search(ctx context.Context, tx *sql.Tx, keyword string) ([]entity.Category, error) 
+type Repository[T entity.NamedEntity] interface {
+	Create(ctx context.Context, tx *sql.Tx, model T) T
+	GetAll(ctx context.Context, tx *sql.Tx, model T) []T
+	GetById(ctx context.Context, tx *sql.Tx, id int, model T) (T, error)
+	Update(ctx context.Context, tx *sql.Tx,  model T) (T, error)
+	Delete(ctx context.Context, tx *sql.Tx, id int32) error
+	Search(ctx context.Context, tx *sql.Tx, keyword string, model T) ([]T, error)
 }

@@ -5,9 +5,10 @@ import (
 	"golang-restful-api/model/web"
 )
 
-func ToCategoryResponse(category entity.Category) web.CategoryResponse {
-	return web.CategoryResponse{
-		Id:   category.Id,
-		Name: category.Name,
-	}
+func ToCategoryResponse[S entity.NamedEntity, R web.EntityResponse](model S, constructor func() R) R {
+	response := constructor()
+	response.SetId(model.GetId())
+	response.SetName(model.GetName())
+	return response
+
 }
