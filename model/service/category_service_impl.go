@@ -64,8 +64,9 @@ func (service *ServiceImpl[T, S, R]) Update(ctx context.Context, request T, mode
 	}
 
 	existingModel.SetName(request.GetName())
+	// existingModel.SetId(request.GetId())
 
-	modelResult, err := service.Repository.Update(ctx, tx, model)
+	modelResult, err := service.Repository.Update(ctx, tx, existingModel)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}
