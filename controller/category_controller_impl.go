@@ -56,7 +56,7 @@ func (controller *ControllerImpl[T, S, R]) Update(writer http.ResponseWriter, re
 	helper.PanicError(err)
 	updateRequest.SetId(id)
 
-	dataResponse := controller.CategoryService.Update(request.Context(), controller.Request, controller.Model)
+	dataResponse := controller.CategoryService.Update(request.Context(), updateRequest, controller.Model)
 	webResponse := web.WebResponse{
 		Code:   200,
 		Status: "OK",

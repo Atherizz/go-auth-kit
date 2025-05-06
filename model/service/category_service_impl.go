@@ -58,12 +58,12 @@ func (service *ServiceImpl[T, S, R]) Update(ctx context.Context, request T, mode
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
 
-	_, err = service.Repository.GetById(ctx, tx, request.GetId(), model)
+	existingModel, err := service.Repository.GetById(ctx, tx, request.GetId(), model)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
-	model.SetName(request.GetName())
+	existingModel.SetName(request.GetName())
 
 	modelResult, err := service.Repository.Update(ctx, tx, model)
 	if err != nil {

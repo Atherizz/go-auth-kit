@@ -16,7 +16,7 @@ func NewRepository[T entity.NamedEntity]() *RepositoryImpl[T] {
 }
 
 func (repo *RepositoryImpl[T]) Create(ctx context.Context, tx *sql.Tx, model T) T {
-	script := "INSERT INTO category(name) VALUES (?)"
+	script := "INSERT INTO categories(name) VALUES (?)"
 	result, err := tx.ExecContext(ctx, script, model.GetName())
 	helper.PanicError(err)
 
@@ -28,7 +28,7 @@ func (repo *RepositoryImpl[T]) Create(ctx context.Context, tx *sql.Tx, model T) 
 }
 
 func (repo *RepositoryImpl[T]) GetAll(ctx context.Context, tx *sql.Tx, model T) []T {
-	script := "SELECT * FROM category"
+	script := "SELECT * FROM categories"
 	result, err := tx.QueryContext(ctx, script)
 	helper.PanicError(err)
 
@@ -36,10 +36,15 @@ func (repo *RepositoryImpl[T]) GetAll(ctx context.Context, tx *sql.Tx, model T) 
 
 	var categories []T
 	for result.Next() {
-		category := model
-		err := result.Scan(category.GetId(), category.GetName)
+		category := model.Clone().(T)
+		var id int
+		var name string
+
+		err := result.Scan(&id, &name)
 		helper.PanicError(err)
 
+		category.SetId(id)
+		category.SetName(name)
 		categories = append(categories, category)
 	}
 
@@ -47,24 +52,30 @@ func (repo *RepositoryImpl[T]) GetAll(ctx context.Context, tx *sql.Tx, model T) 
 }
 
 func (repo *RepositoryImpl[T]) GetById(ctx context.Context, tx *sql.Tx, id int, model T) (T, error) {
-	script := "SELECT * FROM category WHERE id = (?)"
+	script := "SELECT * FROM categories WHERE id = (?)"
 	result, err := tx.QueryContext(ctx, script, id)
 	helper.PanicError(err)
 
 	defer result.Close()
 
-	category := model
 	if result.Next() {
-		err := result.Scan(category.GetId(), category.GetName())
+		category := model.Clone().(T)
+		var id int
+		var name string
+
+		err := result.Scan(&id, &name)
 		helper.PanicError(err)
+
+		category.SetId(id)
+		category.SetName(name)
 		return category, nil
 	}
 
-	return category, errors.New("ID not found")
+	return model, errors.New("ID not found")
 }
 
 func (repo *RepositoryImpl[T]) Search(ctx context.Context, tx *sql.Tx, keyword string, model T) ([]T, error) {
-	script := "SELECT * FROM category WHERE name LIKE (?)"
+	script := "SELECT * FROM categories WHERE name LIKE (?)"
 	param := "%" + keyword + "%"
 	result, err := tx.QueryContext(ctx, script, param)
 	helper.PanicError(err)
@@ -73,9 +84,15 @@ func (repo *RepositoryImpl[T]) Search(ctx context.Context, tx *sql.Tx, keyword s
 
 	var categories []T
 	for result.Next() {
-		category := model
-		err := result.Scan(category.GetId(), category.GetName())
+		category := model.Clone().(T)
+		var id int
+		var name string
+
+		err := result.Scan(&id, &name)
 		helper.PanicError(err)
+
+		category.SetId(id)
+		category.SetName(name)
 		categories = append(categories, category)
 	}
 
@@ -87,7 +104,7 @@ func (repo *RepositoryImpl[T]) Search(ctx context.Context, tx *sql.Tx, keyword s
 }
 
 func (repo *RepositoryImpl[T]) Update(ctx context.Context, tx *sql.Tx, model T) (T, error) {
-	script := "UPDATE category SET name = ? WHERE id = ?"
+	script := "UPDATE categories SET name = ? WHERE id = ?"
 	result, err := tx.ExecContext(ctx, script, model.GetName(), model.GetId())
 	helper.PanicError(err)
 
@@ -103,7 +120,7 @@ func (repo *RepositoryImpl[T]) Update(ctx context.Context, tx *sql.Tx, model T) 
 }
 
 func (repo *RepositoryImpl[T]) Delete(ctx context.Context, tx *sql.Tx, id int32) error {
-	script := "DELETE FROM category WHERE id = ?"
+	script := "DELETE FROM categories WHERE id = ?"
 	result, err := tx.ExecContext(ctx, script, id)
 	helper.PanicError(err)
 
