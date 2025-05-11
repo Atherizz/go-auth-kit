@@ -27,3 +27,6 @@ func NewDB() *sql.DB {
 
 // FORCE KALO ADA DIRTY (KE VERSI SEBELUMNYA)
 // migrate -database "mysql://root@tcp(localhost:3306)/golang_database_migrations" -path db/migrations force xxxxxxxx
+
+// BUAT MIGRATION BARU
+// migrate create -ext sql -dir db/migrations migration_name                                           

@@ -11,14 +11,20 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func NewRouter(categoryController controller.Controller[web.EntityRequest, entity.NamedEntity, web.EntityResponse]) *httprouter.Router {
+func NewRouter(categoryControllers, userControllers controller.Controller[web.EntityRequest, entity.NamedEntity, web.EntityResponse]) *httprouter.Router {
 	router := httprouter.New()
 
-	router.GET("/api/categories", categoryController.FindAll)
-	router.GET("/api/categories/:categoryId", categoryController.FindById)
-	router.POST("/api/categories", categoryController.Create)
-	router.PUT("/api/categories/:categoryId", categoryController.Update)
-	router.DELETE("/api/categories/:categoryId", categoryController.Delete)
+	router.GET("/api/categories", categoryControllers.FindAll)
+	router.GET("/api/categories/:entityId", categoryControllers.FindById)
+	router.POST("/api/categories", categoryControllers.Create)
+	router.PUT("/api/categories/:entityId", categoryControllers.Update)
+	router.DELETE("/api/categories/:entityId", categoryControllers.Delete)
+
+	router.GET("/api/users", userControllers.FindAll)
+	router.GET("/api/users/:entityId", userControllers.FindById)
+	router.POST("/api/users/register", userControllers.Create)
+	router.PUT("/api/users/:entityId", userControllers.Update)
+	router.DELETE("/api/users/:entityId", userControllers.Delete)
 
 	router.PanicHandler = exception.ErrorHandler
 	router.MethodNotAllowed = http.HandlerFunc(exception.NotAllowedError)

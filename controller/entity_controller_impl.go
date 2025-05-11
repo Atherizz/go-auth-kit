@@ -31,6 +31,7 @@ func (controller *ControllerImpl[T, S,R]) Create(writer http.ResponseWriter, req
 	decoder := json.NewDecoder(request.Body)
 	createRequest := controller.Request
 	err := decoder.Decode(&createRequest)
+	// fmt.Printf("DEBUG createRequest: %+v\n", createRequest)
 	helper.PanicError(err)
 
 
@@ -52,8 +53,8 @@ func (controller *ControllerImpl[T, S, R]) Update(writer http.ResponseWriter, re
 	err := decoder.Decode(&updateRequest)
 	helper.PanicError(err)
 
-	categoryId := params.ByName("categoryId")
-	id, err := strconv.Atoi(categoryId)
+	entityId := params.ByName("entityId")
+	id, err := strconv.Atoi(entityId)
 	helper.PanicError(err)
 	updateRequest.SetId(id)
 
@@ -69,8 +70,8 @@ func (controller *ControllerImpl[T, S, R]) Update(writer http.ResponseWriter, re
 
 func (controller *ControllerImpl[T, S, R]) Delete(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 
-	categoryId := params.ByName("categoryId")
-	id, err := strconv.Atoi(categoryId)
+	entityId := params.ByName("entityId")
+	id, err := strconv.Atoi(entityId)
 	helper.PanicError(err)
 
 	controller.CategoryService.Delete(request.Context(), id, controller.Model)
@@ -84,8 +85,8 @@ func (controller *ControllerImpl[T, S, R]) Delete(writer http.ResponseWriter, re
 
 func (controller *ControllerImpl[T, S, R]) FindById(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 
-	categoryId := params.ByName("categoryId")
-	id, err := strconv.Atoi(categoryId)
+	entityId := params.ByName("entityId")
+	id, err := strconv.Atoi(entityId)
 	helper.PanicError(err)
 
 	categoryResponse := controller.CategoryService.FindById(request.Context(), id, controller.Request, controller.Model)

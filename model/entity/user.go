@@ -46,7 +46,7 @@ func (user *User) GetPassword() string {
 }
 
 func (user *User) SetPassword(password string) {
-	user.Email = password
+	user.Password = password
 }
 
 func (user *User) Clone() interface{} {

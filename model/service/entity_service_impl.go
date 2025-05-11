@@ -40,6 +40,11 @@ func (service *ServiceImpl[T, S, R]) Create(ctx context.Context, request T, mode
 	log.Printf("Creating: %+v\n", request)
 	model.SetName(request.GetName())
 
+	if model.GetEntityName() == "users" {
+		model.SetEmail(request.GetEmail())
+		model.SetPassword(request.GetPassword())
+	}
+
 	modelResult := service.Repository.Create(ctx, tx, model)
 	log.Printf("Created model: %+v\n", modelResult)
 
