@@ -33,6 +33,7 @@ func (controller *ControllerImpl[T, S,R]) Create(writer http.ResponseWriter, req
 	err := decoder.Decode(&createRequest)
 	helper.PanicError(err)
 
+
 	dataResponse := controller.CategoryService.Create(request.Context(), createRequest, controller.Model)
 	webResponse := web.WebResponse{
 		Code:   200,

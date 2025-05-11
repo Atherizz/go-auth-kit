@@ -1,7 +1,7 @@
 package web
 
 type CategoryResponse struct {
-	Entity string
+	Entity string `json:"-"`
 	Id     int    `json:"id"`
 	Name   string `json:"name"`
 }

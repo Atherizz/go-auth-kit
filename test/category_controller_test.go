@@ -52,9 +52,15 @@ func setupTestDB() *sql.DB {
 func setupRouter(db *sql.DB) http.Handler {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 
+	response := func() *web.CategoryResponse {
+		return &web.CategoryResponse{}
+	}
 	categoryRepository := repository.NewRepository[*entity.Category]()
-	categoryService := service.NewService[*web.CategoryUpdateRequest, *entity.Category](categoryRepository, db, validate)
-	categoryController := controller.NewController[*web.CategoryUpdateRequest, *entity.Category](categoryService, &web.CategoryUpdateRequest{}, &entity.Category{})
+	categoryService := service.NewService[*web.CategoryUpdateRequest, *entity.Category, *web.CategoryResponse](categoryRepository, db, validate, response)
+	categoryController := controller.NewController[*web.CategoryUpdateRequest, *entity.Category, *web.CategoryResponse](categoryService, &web.CategoryUpdateRequest{}, &entity.Category{
+		Entity: "categories",
+		Column: []string{"name"},
+	})
 
 	router := app.NewRouter(categoryController)
 

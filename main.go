@@ -24,12 +24,13 @@ func main() {
 	}
 	categoryRepository := repository.NewRepository[*entity.Category]()
 	categoryService := service.NewService[*web.CategoryUpdateRequest, *entity.Category, *web.CategoryResponse](categoryRepository, db, validate, response)
-	categoryController := controller.NewController[*web.CategoryUpdateRequest, *entity.Category, *web.CategoryResponse](categoryService, &web.CategoryUpdateRequest{}, &entity.Category{})
+	categoryController := controller.NewController[*web.CategoryUpdateRequest, *entity.Category, *web.CategoryResponse](categoryService, &web.CategoryUpdateRequest{}, &entity.Category{
+		Entity: "categories",
+		Column: []string{"name"},
+	})
 
 	router := app.NewRouter(categoryController)
 	middleware := middleware.NewAuthMiddleware(router)
-
-
 
 	server := http.Server{
 		Addr:    "localhost:8000",

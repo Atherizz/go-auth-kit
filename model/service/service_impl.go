@@ -134,7 +134,7 @@ func (service *ServiceImpl[T, S, R]) Delete(ctx context.Context, id int, model S
 	_, err = service.Repository.GetById(ctx, tx, id, model)
 	helper.PanicError(err)
 
-	err = service.Repository.Delete(ctx, tx, int32(id))
+	err = service.Repository.Delete(ctx, tx, int32(id), model)
 	if err != nil {
 		return err
 	}

@@ -12,6 +12,6 @@ type Repository[T entity.NamedEntity] interface {
 	GetAll(ctx context.Context, tx *sql.Tx, model T) []T
 	GetById(ctx context.Context, tx *sql.Tx, id int, model T) (T, error)
 	Update(ctx context.Context, tx *sql.Tx,  model T) (T, error)
-	Delete(ctx context.Context, tx *sql.Tx, id int32) error
+	Delete(ctx context.Context, tx *sql.Tx, id int32, model T) error
 	Search(ctx context.Context, tx *sql.Tx, keyword string, model T) ([]T, error)
 }

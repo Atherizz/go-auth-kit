@@ -1,6 +1,7 @@
 package entity
 
 type Category struct {
+	Column []string
 	Entity string
 	Id     int
 	Name   string
@@ -8,6 +9,10 @@ type Category struct {
 
 func (category *Category) GetEntityName() string {
 	return category.Entity
+}
+
+func (category *Category) GetColumn() []string {
+	return category.Column
 }
 
 func (category *Category) GetId() int {
@@ -24,6 +29,22 @@ func (category *Category) GetName() string {
 
 func (category *Category) SetName(name string) {
 	category.Name = name
+}
+
+func (category *Category) GetEmail() string {
+	return ""
+}
+
+func (category *Category) SetEmail(email string) {
+	
+}
+
+func (category *Category) GetPassword() string {
+	return ""
+}
+
+func (category *Category) SetPassword(password string) {
+	
 }
 
 func (category *Category) Clone() interface{} {
