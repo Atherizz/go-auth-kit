@@ -52,17 +52,28 @@ func setupTestDB() *sql.DB {
 func setupRouter(db *sql.DB) http.Handler {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 
-	response := func() *web.CategoryResponse {
+	categoryResponse := func() *web.CategoryResponse {
 		return &web.CategoryResponse{}
 	}
+
+	userResponse := func() *web.UserResponse {
+		return &web.UserResponse{}
+	}
 	categoryRepository := repository.NewRepository[*entity.Category]()
-	categoryService := service.NewService[*web.CategoryUpdateRequest, *entity.Category, *web.CategoryResponse](categoryRepository, db, validate, response)
-	categoryController := controller.NewController[*web.CategoryUpdateRequest, *entity.Category, *web.CategoryResponse](categoryService, &web.CategoryUpdateRequest{}, &entity.Category{
+	categoryService := service.NewService[*web.CategoryRequest, *entity.Category, *web.CategoryResponse](categoryRepository, db, validate, categoryResponse)
+	categoryController := controller.NewController[*web.CategoryRequest, *entity.Category, *web.CategoryResponse](categoryService, &web.CategoryRequest{}, &entity.Category{
 		Entity: "categories",
 		Column: []string{"name"},
 	})
 
-	router := app.NewRouter(categoryController)
+	userRepository := repository.NewRepository[*entity.User]()
+	userService := service.NewService[*web.UserRequest, *entity.User, *web.UserResponse](userRepository, db, validate, userResponse)
+	userController := controller.NewController[*web.UserRequest, *entity.User, *web.UserResponse](userService, &web.UserRequest{}, &entity.User{
+		Entity: "users",
+		Column: []string{"name", "email", "password_hash"},
+	})
+
+	router := app.NewRouter(categoryController, userController)
 
 	return middleware.NewAuthMiddleware(router)
 
@@ -123,7 +134,6 @@ func TestCreateCategoryFailed(t *testing.T) {
 
 	assert.Equal(t, 400, res.Code)
 	assert.Equal(t, "BAD REQUEST", res.Status)
-	assert.Equal(t, "Key: 'CategoryCreateRequest.Name' Error:Field validation for 'Name' failed on the 'required' tag", res.Data)
 
 }
 

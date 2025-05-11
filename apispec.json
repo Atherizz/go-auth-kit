@@ -2,8 +2,8 @@
 {
     "openapi":"3.0.3",
     "info": {
-      "title":"Category RESTful API",
-      "description": "API spec for Category",
+      "title":"Meal Plan RESTful API",
+      "description": "API spec for Meal Plan Application",
       "version":"1.0"
     },
     "servers": [
@@ -27,7 +27,7 @@
                 "security": [{
                     "CategoryAuth" : []
                 }],
-                "tags": ["Catgegory API"],
+                "tags": ["Category API"],
                 "description": "Get All Categories",
                 "summary": "List All Category",
                 "responses": {
@@ -100,7 +100,7 @@
             }
             }
         },
-        "/categories/{categoryId}" : {
+        "/categories/{entityId}" : {
             "get" : {
                 "security": [{
                     "CategoryAuth" : []
@@ -238,6 +238,254 @@
                     }
                 }
             }
+        },
+        "/register" : {
+                      "post" : {
+            "security": [{
+                    "CategoryAuth" : []
+                }],
+            "tags": ["Category API"],
+            "description": "Register New User",
+            "summary": "Register New User",
+            "requestBody" : {
+                "content": {
+                    "application/json" : {
+                        "schema" : {
+                            "type": "object",
+                        "properties": {
+                    "id" : {
+                        "type": "number"
+                    }, 
+                    "name" : {
+                        "type": "string"
+                    },
+                    "email" : {
+                        "type": "string"
+                    },
+                    "password" : {
+                        "type": "string"
+                    },
+                    "confirm_password" : {
+                        "type": "string"
+                    }
+                }
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200" : {
+                    "description": "Success create category",
+                    "content": {
+                        "application/json" : {
+                            "schema" : {
+                                "type": "object",
+                                "properties": {
+                                    "code" : {
+                                        "type": "number"
+                                    },
+                                    "status" : {
+                                        "type": "string"
+                                    },
+                                    "data" :  {
+                                        "$ref" : "#/components/schemas/Category"
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            }
+        },
+        "/users" : {
+            "get" :{
+                "parameters": [
+                    {
+                        "required": false,
+                        "schema" : {
+                            "type": "string",
+                            "description": "search by user name"
+                        },
+                        "name": "name",
+                        "in": "query",
+                        "description": "Userame"
+                    }
+                ],
+                "security": [{
+                    "CategoryAuth" : []
+                }],
+                "tags": ["Catgegory API"],
+                "description": "Get All Users",
+                "summary": "List All User",
+                "responses": {
+                    "200" : {
+                        "description": "Success Get All Users",
+                        "content": {
+                            "application/json" : {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code" : {
+                                            "type": "number"
+                                        },
+                                        "status" : {
+                                            "type": "string"
+                                         },
+                                        "data" : {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref" : "#/components/schemas/Category"
+                                            }
+                                        }
+                                        
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{entityId}" : {
+            "get" : {
+                "security": [{
+                    "CategoryAuth" : []
+                }],
+                "tags": ["user API"],
+                "summary": "Get User by ID", 
+                "description": "Get User by ID",
+                "parameters": [
+                    {   
+                        "required": true,
+                        "schema" : {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User Id"
+                    }
+                ],
+                "responses": {
+                    "200" : {
+                        "description": "success get user by id",
+                        "content": {
+                            "application/json" : {
+                                "schema" : {
+                                    "type": "object",
+                                    "properties": {
+                                        "code" : {
+                                            "type": "number"
+                                        },
+                                        "status" : {
+                                            "type": "string"
+                                        },
+                                        "data" :  {
+                                            "$ref" : "#/components/schemas/Category"
+                                        }
+    
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put" : {   
+                "security": [{
+                    "CategoryAuth" : []
+                }],
+                "tags": ["User API"],
+                "summary": "update user by id",
+                "description": "update user by id",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema" : {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User Id"
+                    }
+                ],
+                "requestBody" : {
+                    "content": {
+                        "application/json" : {
+                            "schema" : {
+                                "$ref" : "#/components/schemas/CreateOrUpdateCategory"
+                            }
+                        }
+                    }
+                }, 
+                "responses": {
+                    "200" : {
+                        "description": "success get user by id",
+                        "content": {
+                            "application/json" : {
+                                "schema" : {
+                                    "type": "object",
+                                    "properties": {
+                                        "code" : {
+                                            "type": "number"
+                                        },
+                                        "status" : {
+                                            "type": "string"
+                                        },
+                                        "data" :  {
+                                            "$ref" : "#/components/schemas/Category"
+                                        }
+    
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete" : {
+                "security": [{
+                    "CategoryAuth" : []
+                }],
+                "tags": ["user API"],
+                "summary": "Delete User by ID", 
+                "description": "Delete User by ID",
+                "parameters": [
+                    {   
+                        "required": true,
+                        "schema" : {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User Id"
+                    }
+                ],
+                "responses": {
+                    "200" : {
+                        "description": "success delete user by id",
+                        "content": {
+                            "application/json" : {
+                                "schema" : {
+                                    "type": "object",
+                                    "properties": {
+                                        "code" : {
+                                            "type": "number"
+                                        },
+                                        "status" : {
+                                            "type": "string"
+                                        } 
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -246,7 +494,7 @@
                 "type": "apiKey",
                 "in": "header",
                 "name": "X-API-key",
-                "description": "authentication for category API"
+                "description": "authentication for Meal Plan API"
             }
         },
         "schemas": {

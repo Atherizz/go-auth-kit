@@ -1,11 +1,12 @@
 package web
 
 type UserRequest struct {
-	Entity string `json:"-"`
-	Id     int    `json:"id"`
-	Name   string `json:"name" validate:"required,min=1,max=200"`
-	Email string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required"`
+	Entity          string `json:"-"`
+	Id              int    `json:"id"`
+	Name            string `json:"name" validate:"required,min=1,max=200"`
+	Email           string `json:"email" validate:"required,email"`
+	Password        string `json:"password" validate:"required"`
+	ConfirmPassword string `json:"confirm_password" validate:"eqfield=Password"`
 }
 
 func (entity *UserRequest) GetEntityName() string {
@@ -43,7 +44,3 @@ func (entity *UserRequest) GetPassword() string {
 func (entity *UserRequest) SetPassword(password string) {
 	entity.Password = password
 }
-
-
-
-

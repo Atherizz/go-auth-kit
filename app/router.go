@@ -20,9 +20,9 @@ func NewRouter(categoryControllers, userControllers controller.Controller[web.En
 	router.PUT("/api/categories/:entityId", categoryControllers.Update)
 	router.DELETE("/api/categories/:entityId", categoryControllers.Delete)
 
+	router.POST("/api/register", userControllers.Create)
 	router.GET("/api/users", userControllers.FindAll)
 	router.GET("/api/users/:entityId", userControllers.FindById)
-	router.POST("/api/users/register", userControllers.Create)
 	router.PUT("/api/users/:entityId", userControllers.Update)
 	router.DELETE("/api/users/:entityId", userControllers.Delete)
 

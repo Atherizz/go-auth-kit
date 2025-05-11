@@ -48,7 +48,7 @@ func (service *ServiceImpl[T, S, R]) Create(ctx context.Context, request T, mode
 	modelResult := service.Repository.Create(ctx, tx, model)
 	log.Printf("Created model: %+v\n", modelResult)
 
-	result := helper.ToCategoryResponse[S, R](modelResult, service.ResponseConstructor)
+	result := helper.ToEntityResponse[S, R](modelResult, service.ResponseConstructor)
 	log.Printf("Converted response: %+v\n", result)
 
 	return result
@@ -76,7 +76,7 @@ func (service *ServiceImpl[T, S, R]) Update(ctx context.Context, request T, mode
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
-	result := helper.ToCategoryResponse[S, R](modelResult, service.ResponseConstructor)
+	result := helper.ToEntityResponse[S, R](modelResult, service.ResponseConstructor)
 	return result
 }
 
@@ -90,7 +90,7 @@ func (service *ServiceImpl[T, S, R]) FindById(ctx context.Context, id int, reque
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
-	result := helper.ToCategoryResponse[S, R](modelResult, service.ResponseConstructor)
+	result := helper.ToEntityResponse[S, R](modelResult, service.ResponseConstructor)
 	return result
 }
 
@@ -107,7 +107,7 @@ func (service *ServiceImpl[T, S, R]) Search(ctx context.Context, keyword string,
 	var categoriesResponse []R
 
 	for _, data := range datas {
-		categoryResponse := helper.ToCategoryResponse[S, R](data, service.ResponseConstructor)
+		categoryResponse := helper.ToEntityResponse[S, R](data, service.ResponseConstructor)
 		categoriesResponse = append(categoriesResponse, categoryResponse)
 	}
 
@@ -123,7 +123,7 @@ func (service *ServiceImpl[T, S, R]) Show(ctx context.Context, request T, model 
 	var categoriesResponse []R
 
 	for _, data := range datas {
-		categoryResponse := helper.ToCategoryResponse[S, R](data, service.ResponseConstructor)
+		categoryResponse := helper.ToEntityResponse[S, R](data, service.ResponseConstructor)
 		categoriesResponse = append(categoriesResponse, categoryResponse)
 	}
 

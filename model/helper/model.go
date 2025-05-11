@@ -6,7 +6,7 @@ import (
 	"golang-restful-api/model/web"
 )
 
-func ToCategoryResponse[S entity.NamedEntity, R web.EntityResponse](model S, constructor func() R) R {
+func ToEntityResponse[S entity.NamedEntity, R web.EntityResponse](model S, constructor func() R) R {
 	response := constructor()
 	response.SetId(model.GetId())
 	response.SetName(model.GetName())
@@ -17,7 +17,5 @@ func ToCategoryResponse[S entity.NamedEntity, R web.EntityResponse](model S, con
 		response.SetEmail(model.GetEmail())
 		response.SetPassword(model.GetPassword())
 	}
-
 	return response
-
 }

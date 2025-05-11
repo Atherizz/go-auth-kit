@@ -4,10 +4,9 @@ import (
 	"golang-restful-api/model/helper"
 	"golang-restful-api/model/web"
 	"net/http"
+
 	"github.com/go-playground/validator/v10"
 )
-
-
 
 func ErrorHandler(writer http.ResponseWriter, request *http.Request, err interface{}) {
 
@@ -22,19 +21,19 @@ func ErrorHandler(writer http.ResponseWriter, request *http.Request, err interfa
 	internalServerError(writer, request, err)
 }
 
-func NotAllowedError(writer http.ResponseWriter, request *http.Request)  {
+func NotAllowedError(writer http.ResponseWriter, request *http.Request) {
 
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusMethodNotAllowed)
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusMethodNotAllowed)
 
-		webResponse := web.WebResponse{
-			Code:   http.StatusMethodNotAllowed,
-			Status: "METHOD NOT ALLOWED",
-		}
-		helper.WriteEncodeResponse(writer, webResponse)
+	webResponse := web.WebResponse{
+		Code:   http.StatusMethodNotAllowed,
+		Status: "METHOD NOT ALLOWED",
+	}
+	helper.WriteEncodeResponse(writer, webResponse)
 }
 
-func NotFoundRouteError(writer http.ResponseWriter, request *http.Request)  {
+func NotFoundRouteError(writer http.ResponseWriter, request *http.Request) {
 
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusNotFound)
@@ -45,8 +44,6 @@ func NotFoundRouteError(writer http.ResponseWriter, request *http.Request)  {
 	}
 	helper.WriteEncodeResponse(writer, webResponse)
 }
-
-
 
 func notFoundError(writer http.ResponseWriter, request *http.Request, err interface{}) bool {
 	exception, ok := err.(NotFoundError)
@@ -68,6 +65,17 @@ func notFoundError(writer http.ResponseWriter, request *http.Request, err interf
 
 func validationError(writer http.ResponseWriter, request *http.Request, err interface{}) bool {
 	exception, ok := err.(validator.ValidationErrors)
+	var errorMsg string
+
+	for _, e := range exception {
+		if e.Tag() == "eqfield" {
+			errorMsg = "Password confirmation does not match the password."
+		} else if e.Tag() == "required" {
+			errorMsg = "field is required"
+		} else if e.Tag() == "email" {
+			errorMsg = "field email must be an email"
+		}
+	}
 
 	if ok {
 		writer.Header().Set("Content-Type", "application/json")
@@ -76,7 +84,7 @@ func validationError(writer http.ResponseWriter, request *http.Request, err inte
 		webResponse := web.WebResponse{
 			Code:   http.StatusBadRequest,
 			Status: "BAD REQUEST",
-			Data:   exception.Error(),
+			Data:   errorMsg,
 		}
 		helper.WriteEncodeResponse(writer, webResponse)
 		return true
