@@ -11,7 +11,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func NewRouter(categoryControllers, userControllers controller.Controller[web.EntityRequest, entity.NamedEntity, web.EntityResponse]) *httprouter.Router {
+func NewRouter(categoryControllers, userControllers controller.EntityController[web.EntityRequest, entity.NamedEntity, web.EntityResponse]) *httprouter.Router {
 	router := httprouter.New()
 
 	router.GET("/api/categories", categoryControllers.FindAll)

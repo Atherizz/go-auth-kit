@@ -7,7 +7,7 @@ import (
 	// "golang-restful-api/model/web"
 )
 
-type Service[T web.EntityRequest, S entity.NamedEntity, R web.EntityResponse] interface {
+type EntityService[T web.EntityRequest, S entity.NamedEntity, R web.EntityResponse] interface {
 	Create(ctx context.Context, request T, model S) R
 	Update(ctx context.Context, request T, model S) R
 	FindById(ctx context.Context, id int, request T, model S) R

@@ -12,22 +12,22 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-type ControllerImpl[T web.EntityRequest, S entity.NamedEntity, R web.EntityResponse] struct {
-	CategoryService service.Service[T,S,R]
+type EntityControllerImpl[T web.EntityRequest, S entity.NamedEntity, R web.EntityResponse] struct {
+	CategoryService service.EntityService[T,S,R]
 	Request        T
 	Model           S
 
 }
 
-func NewController[T web.EntityRequest, S entity.NamedEntity, R web.EntityResponse](categoryService service.Service[T,S,R], request T, model S) *ControllerImpl[T,S,R] {
-	return &ControllerImpl[T,S,R]{
+func NewController[T web.EntityRequest, S entity.NamedEntity, R web.EntityResponse](categoryService service.EntityService[T,S,R], request T, model S) *EntityControllerImpl[T,S,R] {
+	return &EntityControllerImpl[T,S,R]{
 		CategoryService: categoryService,
 		Request: request,
 		Model: model,
 	}
 }
 
-func (controller *ControllerImpl[T, S,R]) Create(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (controller *EntityControllerImpl[T, S,R]) Create(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	decoder := json.NewDecoder(request.Body)
 	createRequest := controller.Request
 	err := decoder.Decode(&createRequest)
@@ -46,7 +46,7 @@ func (controller *ControllerImpl[T, S,R]) Create(writer http.ResponseWriter, req
 
 }
 
-func (controller *ControllerImpl[T, S, R]) Update(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (controller *EntityControllerImpl[T, S, R]) Update(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 
 	decoder := json.NewDecoder(request.Body)
 	updateRequest := controller.Request
@@ -68,7 +68,7 @@ func (controller *ControllerImpl[T, S, R]) Update(writer http.ResponseWriter, re
 	helper.WriteEncodeResponse(writer, webResponse)
 }
 
-func (controller *ControllerImpl[T, S, R]) Delete(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (controller *EntityControllerImpl[T, S, R]) Delete(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 
 	entityId := params.ByName("entityId")
 	id, err := strconv.Atoi(entityId)
@@ -83,7 +83,7 @@ func (controller *ControllerImpl[T, S, R]) Delete(writer http.ResponseWriter, re
 	helper.WriteEncodeResponse(writer, webResponse)
 }
 
-func (controller *ControllerImpl[T, S, R]) FindById(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (controller *EntityControllerImpl[T, S, R]) FindById(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 
 	entityId := params.ByName("entityId")
 	id, err := strconv.Atoi(entityId)
@@ -99,7 +99,7 @@ func (controller *ControllerImpl[T, S, R]) FindById(writer http.ResponseWriter, 
 	helper.WriteEncodeResponse(writer, webResponse)
 }
 
-func (controller *ControllerImpl[T, S,R]) FindAll(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (controller *EntityControllerImpl[T, S,R]) FindAll(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 
 	keyword := request.URL.Query().Get("search")
 

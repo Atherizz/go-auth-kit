@@ -14,4 +14,5 @@ type Repository[T entity.NamedEntity] interface {
 	Update(ctx context.Context, tx *sql.Tx,  model T) (T, error)
 	Delete(ctx context.Context, tx *sql.Tx, id int32, model T) error
 	Search(ctx context.Context, tx *sql.Tx, keyword string, model T) ([]T, error)
+
 }

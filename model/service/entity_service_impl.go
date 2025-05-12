@@ -13,23 +13,23 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type ServiceImpl[T web.EntityRequest, S entity.NamedEntity, R web.EntityResponse] struct {
+type EntityServiceImpl[T web.EntityRequest, S entity.NamedEntity, R web.EntityResponse] struct {
 	Repository          repository.Repository[S]
 	DB                  *sql.DB
 	Validate            *validator.Validate
 	ResponseConstructor func() R
 }
 
-func NewService[T web.EntityRequest, S entity.NamedEntity, R web.EntityResponse](categoryRepository repository.Repository[S], db *sql.DB, validate *validator.Validate, constructor func() R) *ServiceImpl[T, S, R] {
-	return &ServiceImpl[T, S, R]{
-		Repository:          categoryRepository,
+func NewService[T web.EntityRequest, S entity.NamedEntity, R web.EntityResponse](entityRepository repository.Repository[S], db *sql.DB, validate *validator.Validate, constructor func() R) *EntityServiceImpl[T, S, R] {
+	return &EntityServiceImpl[T, S, R]{
+		Repository:          entityRepository,
 		DB:                  db,
 		Validate:            validate,
 		ResponseConstructor: constructor,
 	}
 }
 
-func (service *ServiceImpl[T, S, R]) Create(ctx context.Context, request T, model S) R {
+func (service *EntityServiceImpl[T, S, R]) Create(ctx context.Context, request T, model S) R {
 	err := service.Validate.Struct(request)
 	helper.PanicError(err)
 
@@ -54,7 +54,7 @@ func (service *ServiceImpl[T, S, R]) Create(ctx context.Context, request T, mode
 	return result
 }
 
-func (service *ServiceImpl[T, S, R]) Update(ctx context.Context, request T, model S) R {
+func (service *EntityServiceImpl[T, S, R]) Update(ctx context.Context, request T, model S) R {
 
 	errValidate := service.Validate.Var(request.GetName(), "required,min=1,max=200")
 	helper.PanicError(errValidate)
@@ -80,7 +80,7 @@ func (service *ServiceImpl[T, S, R]) Update(ctx context.Context, request T, mode
 	return result
 }
 
-func (service *ServiceImpl[T, S, R]) FindById(ctx context.Context, id int, request T, model S) R {
+func (service *EntityServiceImpl[T, S, R]) FindById(ctx context.Context, id int, request T, model S) R {
 	tx, err := service.DB.Begin()
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
@@ -94,7 +94,7 @@ func (service *ServiceImpl[T, S, R]) FindById(ctx context.Context, id int, reque
 	return result
 }
 
-func (service *ServiceImpl[T, S, R]) Search(ctx context.Context, keyword string, request T, model S) []R {
+func (service *EntityServiceImpl[T, S, R]) Search(ctx context.Context, keyword string, request T, model S) []R {
 	tx, err := service.DB.Begin()
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
@@ -114,7 +114,7 @@ func (service *ServiceImpl[T, S, R]) Search(ctx context.Context, keyword string,
 	return categoriesResponse
 }
 
-func (service *ServiceImpl[T, S, R]) Show(ctx context.Context, request T, model S) []R {
+func (service *EntityServiceImpl[T, S, R]) Show(ctx context.Context, request T, model S) []R {
 	tx, err := service.DB.Begin()
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
@@ -131,7 +131,7 @@ func (service *ServiceImpl[T, S, R]) Show(ctx context.Context, request T, model 
 
 }
 
-func (service *ServiceImpl[T, S, R]) Delete(ctx context.Context, id int, model S) error {
+func (service *EntityServiceImpl[T, S, R]) Delete(ctx context.Context, id int, model S) error {
 	tx, err := service.DB.Begin()
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
