@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func NewServer(m *middleware.AuthMiddleware) *http.Server {
+func NewServer(m *middleware.ApiKeyAuthMiddleware) *http.Server {
 	server := http.Server{
 		Addr:    "localhost:8000",
 		Handler: m,

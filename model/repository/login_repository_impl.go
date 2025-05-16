@@ -11,13 +11,13 @@ import (
 type LoginRepositoryImpl struct {
 }
 
-func NewLoginRepository () *LoginRepositoryImpl {
+func NewLoginRepository() *LoginRepositoryImpl {
 	return &LoginRepositoryImpl{}
 }
 
-func (repo *LoginRepositoryImpl) GetByName(ctx context.Context, tx *sql.Tx, name string) (entity.User, error) {
-	script := "SELECT * FROM users WHERE name = (?)"
-	result, err := tx.QueryContext(ctx, script, name)
+func (repo *LoginRepositoryImpl) GetByEmail(ctx context.Context, tx *sql.Tx, email string) (entity.User, error) {
+	script := "SELECT id,name,email,password_hash FROM users WHERE email = (?)"
+	result, err := tx.QueryContext(ctx, script, email)
 	helper.PanicError(err)
 
 	defer result.Close()

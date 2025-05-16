@@ -40,12 +40,19 @@ func main() {
 		Column: []string{"name", "email", "password_hash"},
 	})
 
-	router := app.NewRouter(categoryController, userController)
-	middleware := middleware.NewAuthMiddleware(router)
+	loginRepository := repository.NewLoginRepository()
+	loginService := service.NewLoginService(loginRepository, db, validate)
+	loginController := controller.NewLoginController(loginService)
+
+	router := app.NewRouter(categoryController, userController, loginController)
+	apiKeyMiddleware := middleware.NewApiKeyAuthMiddleware(router)
+	
+	// jwtMiddleware := middleware.NewJwtAuthMiddleware(apiKeyMiddleware)
+
 
 	server := http.Server{
 		Addr:    "localhost:8000",
-		Handler: middleware,
+		Handler: apiKeyMiddleware,
 	}
 	err := server.ListenAndServe()
 	helper.PanicError(err)

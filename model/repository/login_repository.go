@@ -7,5 +7,5 @@ import (
 )
 
 type LoginRepository interface {
-	GetByName(ctx context.Context, tx *sql.Tx, name string) (entity.User,error)
+	GetByEmail(ctx context.Context, tx *sql.Tx, email string) (entity.User,error)
 }

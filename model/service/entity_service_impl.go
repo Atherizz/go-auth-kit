@@ -86,11 +86,13 @@ func (service *EntityServiceImpl[T, S, R]) FindById(ctx context.Context, id int,
 	defer helper.CommitOrRollback(tx)
 
 	modelResult, err := service.Repository.GetById(ctx, tx, id, model)
+	log.Printf("Created model: %+v\n", modelResult)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
 	result := helper.ToEntityResponse[S, R](modelResult, service.ResponseConstructor)
+	log.Printf("Response : %+v\n", result)
 	return result
 }
 

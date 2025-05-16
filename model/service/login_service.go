@@ -6,5 +6,5 @@ import (
 )
 
 type LoginService interface {
-	CheckCredentials(ctx context.Context, request web.LoginRequest) web.LoginResponse
+	CheckCredentials(ctx context.Context, request web.LoginRequest) (web.LoginResponse, error)
 }

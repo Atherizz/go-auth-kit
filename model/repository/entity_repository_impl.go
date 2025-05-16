@@ -6,7 +6,9 @@ import (
 	"errors"
 	"golang-restful-api/model/entity"
 	"golang-restful-api/model/helper"
+	"log"
 	"strings"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -23,7 +25,6 @@ func (repo *EntityRepositoryImpl[T]) Create(ctx context.Context, tx *sql.Tx, mod
 	getColumn := model.GetColumn()
 	prepare := "("
 
-	
 	for i := 0; i < len(getColumn); i++ {
 		if i != len(getColumn)-1 {
 			prepare += "?,"
@@ -34,15 +35,15 @@ func (repo *EntityRepositoryImpl[T]) Create(ctx context.Context, tx *sql.Tx, mod
 
 	column := "(" + strings.Join(getColumn, ",") + ")"
 	script := "INSERT INTO " + entity + " " + column + "VALUES " + prepare + ""
-	
+
 	switch entity {
 	case "categories":
 		result, err := tx.ExecContext(ctx, script, model.GetName())
 		helper.PanicError(err)
 		id, err := result.LastInsertId()
 		helper.PanicError(err)
-		model.SetId(int(id))	
-	case "users" :
+		model.SetId(int(id))
+	case "users":
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(model.GetPassword()), bcrypt.DefaultCost)
 		helper.PanicError(err)
 		hashedString := string(hashedPassword)
@@ -51,9 +52,9 @@ func (repo *EntityRepositoryImpl[T]) Create(ctx context.Context, tx *sql.Tx, mod
 		helper.PanicError(err)
 		id, err := result.LastInsertId()
 		helper.PanicError(err)
-		model.SetId(int(id))	
-	} 
-	
+		model.SetId(int(id))
+	}
+
 	return model
 }
 
@@ -69,33 +70,40 @@ func (repo *EntityRepositoryImpl[T]) GetAll(ctx context.Context, tx *sql.Tx, mod
 	var entities []T
 	for result.Next() {
 		dataEntity := model.Clone().(T)
-	switch entity {
-	case "categories":
+		switch entity {
+		case "categories":
 			var id int
 			var name string
-	
+
 			err := result.Scan(&id, &name)
 			helper.PanicError(err)
 			dataEntity.SetId(id)
 			dataEntity.SetName(name)
 			entities = append(entities, dataEntity)
 
-	case "users" :
+		case "users":
 			var id int
 			var name string
 			var email string
-			var password string 
+			var password string
+			var isAdmin bool
+			var createdAt time.Time
 
-			err := result.Scan(&id, &name, &email, &password)
-			helper.PanicError(err)
+			err := result.Scan(&id, &name, &email, &password, &isAdmin, &createdAt)
+			columns, err := result.Columns()
+			if err != nil {
+			log.Fatal("Error getting columns:", err)
+			}
+			log.Println("Columns returned:", columns)
+
 			dataEntity.SetId(id)
 			dataEntity.SetName(name)
 			dataEntity.SetEmail(email)
 			dataEntity.SetPassword(password)
 			entities = append(entities, dataEntity)
-		}	
-	} 
-	
+		}
+	}
+
 	return entities
 }
 
@@ -103,6 +111,8 @@ func (repo *EntityRepositoryImpl[T]) GetById(ctx context.Context, tx *sql.Tx, id
 	entity := model.GetEntityName()
 
 	script := "SELECT * FROM " + entity + " WHERE id = (?)"
+	log.Printf("Query: %s, ID: %d\n", script, id)
+
 	result, err := tx.QueryContext(ctx, script, id)
 	helper.PanicError(err)
 
@@ -112,34 +122,41 @@ func (repo *EntityRepositoryImpl[T]) GetById(ctx context.Context, tx *sql.Tx, id
 		dataEntity := model.Clone().(T)
 		switch entity {
 		case "categories":
-				var id int
-				var name string
-		
-				err := result.Scan(&id, &name)
-				helper.PanicError(err)
-				dataEntity.SetId(id)
-				dataEntity.SetName(name)
-				return dataEntity, nil
-	
-		case "users" :
-				var id int
-				var name string
-				var email string
-				var password string 
-	
-				err := result.Scan(&id, &name, &email, &password)
-				helper.PanicError(err)
-				dataEntity.SetId(id)
-				dataEntity.SetName(name)
-				dataEntity.SetEmail(email)
-				dataEntity.SetPassword(password)
-				return dataEntity, nil
-			}	
+			var id int
+			var name string
+
+			err := result.Scan(&id, &name)
+			helper.PanicError(err)
+			dataEntity.SetId(id)
+			dataEntity.SetName(name)
+			return dataEntity, nil
+
+		case "users":
+			var id int
+			var name string
+			var email string
+			var password string
+			var isAdmin bool
+			var createdAt time.Time
+
+			err := result.Scan(&id, &name, &email, &password, &isAdmin, &createdAt)
+			columns, err := result.Columns()
+			if err != nil {
+			log.Fatal("Error getting columns:", err)
+			}
+			log.Println("Columns returned:", columns)
+
+			helper.PanicError(err)
+			dataEntity.SetId(id)
+			dataEntity.SetName(name)
+			dataEntity.SetEmail(email)
+			dataEntity.SetPassword(password)
+			return dataEntity, nil
+		}
 	}
 
 	return model, errors.New("ID not found")
 }
-
 
 func (repo *EntityRepositoryImpl[T]) Search(ctx context.Context, tx *sql.Tx, keyword string, model T) ([]T, error) {
 	entity := model.GetEntityName()
@@ -154,32 +171,38 @@ func (repo *EntityRepositoryImpl[T]) Search(ctx context.Context, tx *sql.Tx, key
 	var entities []T
 	for result.Next() {
 		dataEntity := model.Clone().(T)
-	switch entity {
-	case "categories":
+		switch entity {
+		case "categories":
 			var id int
 			var name string
-	
+
 			err := result.Scan(&id, &name)
 			helper.PanicError(err)
 			dataEntity.SetId(id)
 			dataEntity.SetName(name)
 			entities = append(entities, dataEntity)
-	case "users" :
+		case "users":
 			var id int
 			var name string
 			var email string
-			var password string 
+			var password string
+			var isAdmin bool
+			var createdAt time.Time
 
-			err := result.Scan(&id, &name, &email, &password)
-			helper.PanicError(err)
+			err := result.Scan(&id, &name, &email, &password, &isAdmin, &createdAt)
+			columns, err := result.Columns()
+			if err != nil {
+			log.Fatal("Error getting columns:", err)
+			}
+			log.Println("Columns returned:", columns)
 			dataEntity.SetId(id)
 			dataEntity.SetName(name)
 			dataEntity.SetEmail(email)
 			dataEntity.SetPassword(password)
 			entities = append(entities, dataEntity)
-		}	
-	} 
-	
+		}
+	}
+
 	if len(entities) == 0 {
 		return entities, errors.New("No Data Found")
 	}

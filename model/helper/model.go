@@ -1,7 +1,6 @@
 package helper
 
 import (
-	"fmt"
 	"golang-restful-api/model/entity"
 	"golang-restful-api/model/web"
 )
@@ -10,13 +9,8 @@ func ToEntityResponse[S entity.NamedEntity, R web.EntityResponse](model S, const
 	response := constructor()
 	response.SetId(model.GetId())
 	response.SetName(model.GetName())
+	response.SetEmail(model.GetEmail())
 
-	if model.GetEntityName() == "users" {
-		fmt.Printf("DEBUG email: \n", model.GetEmail())
-		fmt.Printf("DEBUG password: \n", model.GetPassword())
-		response.SetEmail(model.GetEmail())
-		response.SetPassword(model.GetPassword())
-	}
 	return response
 }
 
