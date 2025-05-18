@@ -33,7 +33,6 @@ func NewRouter(categoryControllers, userControllers controller.EntityController[
 
 	router.GET("/api/check-user", jwtMiddleware.Wrap(middleware.CheckUser))
 
-
 	router.PanicHandler = exception.ErrorHandler
 	router.MethodNotAllowed = http.HandlerFunc(exception.NotAllowedError)
 	router.NotFound = http.HandlerFunc(exception.NotFoundRouteError)

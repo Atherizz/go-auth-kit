@@ -16,10 +16,21 @@ func ToEntityResponse[S entity.NamedEntity, R web.EntityResponse](model S, const
 
 func ToUserResponse(user entity.User) web.UserResponse {
 	return web.UserResponse{
-		Entity: user.Entity,
-		Id: user.Id,
-		Name: user.Name,
-		Email: user.Email,
+		Entity:   user.Entity,
+		Id:       user.Id,
+		Name:     user.Name,
+		Email:    user.Email,
 		Password: user.Password,
+	}
+}
+
+func ToRecipeResponse(recipe entity.Recipe) web.RecipeResponse {
+	return web.RecipeResponse{
+		Id:          recipe.Id,
+		Title:       recipe.Title,
+		Ingredients: recipe.Ingredients,
+		Calories:    float64(recipe.Calories),
+		UserId: recipe.UserId,
+		CategoryId: recipe.CategoryId,
 	}
 }
