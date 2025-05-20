@@ -61,3 +61,27 @@ func (service *LoginServiceImpl) CheckCredentials(ctx context.Context, request w
 	return loginResponse, nil
 
 }
+
+func (service *LoginServiceImpl) GetUserData(ctx context.Context, id int) (web.UserResponse, error) {
+	err := service.Validate.Var(id, "number")
+	if err != nil {
+	return web.UserResponse{}, err
+	}
+
+	tx, err := service.DB.Begin()
+	if err != nil {
+		return web.UserResponse{}, err
+	}
+	defer helper.CommitOrRollback(tx)
+
+	user, err := service.Repository.GetById(ctx, tx, id)
+	if err != nil {
+		return web.UserResponse{}, err
+	}
+
+	userResponse := helper.ToUserResponse(user)
+	return userResponse, nil
+
+
+
+}

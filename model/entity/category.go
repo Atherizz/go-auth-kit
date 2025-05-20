@@ -2,13 +2,12 @@ package entity
 
 type Category struct {
 	Column []string
-	Entity string
 	Id     int
 	Name   string
 }
 
 func (category *Category) GetEntityName() string {
-	return category.Entity
+	return "categories"
 }
 
 func (category *Category) GetColumn() []string {

@@ -16,7 +16,6 @@ func ToEntityResponse[S entity.NamedEntity, R web.EntityResponse](model S, const
 
 func ToUserResponse(user entity.User) web.UserResponse {
 	return web.UserResponse{
-		Entity:   user.Entity,
 		Id:       user.Id,
 		Name:     user.Name,
 		Email:    user.Email,

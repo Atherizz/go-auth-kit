@@ -29,7 +29,8 @@ func (repo *RecipeRepositoryImpl) Create(ctx context.Context, tx *sql.Tx, recipe
 }
 
 func (repo *RecipeRepositoryImpl) GetAll(ctx context.Context, tx *sql.Tx) []entity.Recipe {
-	script := "SELECT * FROM recipes"
+	script := "SELECT id, title, ingredients, calories, user_id, category_id FROM recipes"
+
 	result, err := tx.QueryContext(ctx, script)
 	helper.PanicError(err)
 
@@ -38,7 +39,7 @@ func (repo *RecipeRepositoryImpl) GetAll(ctx context.Context, tx *sql.Tx) []enti
 	var recipes []entity.Recipe
 	for result.Next() {
 		recipe := entity.Recipe{}
-		err := result.Scan(&recipe.Id, &recipe.Title, &recipe.Ingredients, &recipe.Calories, &recipe.UserId, recipe.CategoryId)
+		err := result.Scan(&recipe.Id, &recipe.Title, &recipe.Ingredients, &recipe.Calories, &recipe.UserId, &recipe.CategoryId)
 		helper.PanicError(err)
 
 		recipes = append(recipes, recipe)
@@ -48,7 +49,7 @@ func (repo *RecipeRepositoryImpl) GetAll(ctx context.Context, tx *sql.Tx) []enti
 }
 
 func (repo *RecipeRepositoryImpl) GetById(ctx context.Context, tx *sql.Tx, id int) (entity.Recipe, error) {
-	script := "SELECT * FROM recipes WHERE id = (?)"
+	script := "SELECT id,title,ingredients,calories,user_id,category_id FROM recipes WHERE id = (?)"
 	result, err := tx.QueryContext(ctx, script, id)
 	helper.PanicError(err)
 
@@ -56,7 +57,7 @@ func (repo *RecipeRepositoryImpl) GetById(ctx context.Context, tx *sql.Tx, id in
 
 	recipe := entity.Recipe{}
 	if result.Next() {
-		err := result.Scan(&recipe.Id, &recipe.Title, &recipe.Ingredients, &recipe.Calories, &recipe.UserId, recipe.CategoryId)
+		err := result.Scan(&recipe.Id, &recipe.Title, &recipe.Ingredients, &recipe.Calories, &recipe.UserId, &recipe.CategoryId)
 		helper.PanicError(err)
 		return recipe, nil
 	}
@@ -65,7 +66,7 @@ func (repo *RecipeRepositoryImpl) GetById(ctx context.Context, tx *sql.Tx, id in
 }
 
 func (repo *RecipeRepositoryImpl) Search(ctx context.Context, tx *sql.Tx, keyword string) ([]entity.Recipe, error) {
-	script := "SELECT * FROM recipes WHERE title LIKE (?)"
+	script := "SELECT id,title,ingredients,calories,user_id,category_id FROM recipes WHERE title LIKE (?)"
 	param := "%" + keyword + "%"
 	result, err := tx.QueryContext(ctx, script, param)
 	helper.PanicError(err)
@@ -75,7 +76,7 @@ func (repo *RecipeRepositoryImpl) Search(ctx context.Context, tx *sql.Tx, keywor
 	var recipes []entity.Recipe
 	for result.Next() {
 		recipe := entity.Recipe{}
-		err := result.Scan(&recipe.Id, &recipe.Title, &recipe.Ingredients, &recipe.Calories, &recipe.UserId, recipe.CategoryId)
+		err := result.Scan(&recipe.Id, &recipe.Title, &recipe.Ingredients, &recipe.Calories, &recipe.UserId, &recipe.CategoryId)
 		helper.PanicError(err)
 		recipes = append(recipes, recipe)
 	}

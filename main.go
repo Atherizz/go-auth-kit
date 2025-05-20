@@ -29,14 +29,12 @@ func main() {
 	categoryRepository := repository.NewRepository[*entity.Category]()
 	categoryService := service.NewService[*web.CategoryRequest, *entity.Category, *web.CategoryResponse](categoryRepository, db, validate, categoryResponse)
 	categoryController := controller.NewController[*web.CategoryRequest, *entity.Category, *web.CategoryResponse](categoryService, &web.CategoryRequest{}, &entity.Category{
-		Entity: "categories",
 		Column: []string{"name"},
 	})
 
 	userRepository := repository.NewRepository[*entity.User]()
 	userService := service.NewService[*web.UserRequest, *entity.User, *web.UserResponse](userRepository, db, validate, userResponse)
 	userController := controller.NewController[*web.UserRequest, *entity.User, *web.UserResponse](userService, &web.UserRequest{}, &entity.User{
-		Entity: "users",
 		Column: []string{"name", "email", "password_hash"},
 	})
 
@@ -44,12 +42,13 @@ func main() {
 	loginService := service.NewLoginService(loginRepository, db, validate)
 	loginController := controller.NewLoginController(loginService)
 
-	router := app.NewRouter(categoryController, userController, loginController)
+	recipeRepository := repository.NewRecipeRepository()
+	recipeService := service.NewRecipeService(recipeRepository,db,validate)
+	recipeController := controller.NewRecipeController(recipeService)
+
+	router := app.NewRouter(categoryController, userController, loginController, recipeController, db)
 	apiKeyMiddleware := middleware.NewApiKeyAuthMiddleware(router)
 	
-	// jwtMiddleware := middleware.NewJwtAuthMiddleware(apiKeyMiddleware)
-
-
 	server := http.Server{
 		Addr:    "localhost:8000",
 		Handler: apiKeyMiddleware,

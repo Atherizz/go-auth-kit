@@ -31,3 +31,20 @@ func (repo *LoginRepositoryImpl) GetByEmail(ctx context.Context, tx *sql.Tx, ema
 
 	return user, errors.New("ID not found")
 }
+
+func (repo *LoginRepositoryImpl) GetById(ctx context.Context, tx *sql.Tx, id int) (entity.User, error) {
+	script := "SELECT id,name,email,password_hash,is_admin FROM users WHERE id = (?)"
+	result, err := tx.QueryContext(ctx, script, id)
+	helper.PanicError(err)
+
+	defer result.Close()
+
+	user := entity.User{}
+	if result.Next() {
+		err := result.Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.IsAdmin)
+		helper.PanicError(err)
+		return user, nil
+	}
+
+	return user, errors.New("ID not found")
+}

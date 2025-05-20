@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"golang-restful-api/model/entity"
 	"golang-restful-api/model/helper"
 	"log"
@@ -212,9 +213,12 @@ func (repo *EntityRepositoryImpl[T]) Search(ctx context.Context, tx *sql.Tx, key
 
 func (repo *EntityRepositoryImpl[T]) Update(ctx context.Context, tx *sql.Tx, model T) (T, error) {
 	entity := model.GetEntityName()
-
+	
 	script := "UPDATE " + entity + " SET name = ? WHERE id = ?"
+	fmt.Printf("DEBUG - Entity: %s, Name: %s, ID: %d\n", entity, model.GetName(), model.GetId())
 	result, err := tx.ExecContext(ctx, script, model.GetName(), model.GetId())
+
+
 	helper.PanicError(err)
 
 	row, err := result.RowsAffected()

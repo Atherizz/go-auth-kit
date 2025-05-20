@@ -1,6 +1,7 @@
 package app
 
 import (
+	"database/sql"
 	"golang-restful-api/controller"
 	"golang-restful-api/exception"
 	"golang-restful-api/middleware"
@@ -12,26 +13,35 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func NewRouter(categoryControllers, userControllers controller.EntityController[web.EntityRequest, entity.NamedEntity, web.EntityResponse], loginController controller.LoginController) *httprouter.Router {
+func NewRouter(categoryControllers, userControllers controller.EntityController[web.EntityRequest, entity.NamedEntity, web.EntityResponse], loginController controller.LoginController, recipeControllers controller.RecipeController, db *sql.DB) *httprouter.Router {
 	router := httprouter.New()
 
 	router.POST("/api/register", userControllers.Create)
 	router.POST("/api/login", loginController.Login)
 
 	jwtMiddleware := middleware.NewJwtAuthMiddleware(router)
+	adminMiddleware := middleware.NewAdminAuthMiddleware(router,db)
+	checkUserMiddleware := middleware.NewCheckUserMiddleware(router)
+
 
 	router.GET("/api/categories", jwtMiddleware.Wrap(categoryControllers.FindAll))
 	router.GET("/api/categories/:entityId", jwtMiddleware.Wrap(categoryControllers.FindById))
-	router.POST("/api/categories", jwtMiddleware.Wrap(categoryControllers.Create))
-	router.PUT("/api/categories/:entityId", jwtMiddleware.Wrap(categoryControllers.Update))
-	router.DELETE("/api/categories/:entityId", jwtMiddleware.Wrap(categoryControllers.Delete))
+	router.POST("/api/categories", jwtMiddleware.Wrap(adminMiddleware.Wrap(categoryControllers.Create)))
+	router.PUT("/api/categories/:entityId", jwtMiddleware.Wrap(adminMiddleware.Wrap(categoryControllers.Update)))
+	router.DELETE("/api/categories/:entityId", jwtMiddleware.Wrap(adminMiddleware.Wrap(categoryControllers.Delete)))
 
 	router.GET("/api/users", jwtMiddleware.Wrap(userControllers.FindAll))
 	router.GET("/api/users/:entityId", jwtMiddleware.Wrap(userControllers.FindById))
-	router.PUT("/api/users/:entityId", jwtMiddleware.Wrap(userControllers.Update))
-	router.DELETE("/api/users/:entityId", jwtMiddleware.Wrap(userControllers.Delete))
+	router.PUT("/api/users/:entityId", jwtMiddleware.Wrap(checkUserMiddleware.Wrap(userControllers.Update)))
+	router.DELETE("/api/users/:entityId", jwtMiddleware.Wrap(checkUserMiddleware.Wrap(userControllers.Delete)))
 
-	router.GET("/api/check-user", jwtMiddleware.Wrap(middleware.CheckUser))
+	router.GET("/api/recipes", jwtMiddleware.Wrap(recipeControllers.FindAll))
+	router.GET("/api/recipes/:recipeId", jwtMiddleware.Wrap(recipeControllers.FindById))
+	router.POST("/api/recipes", jwtMiddleware.Wrap(recipeControllers.Create))
+	router.DELETE("/api/recipes/:recipeId", jwtMiddleware.Wrap(checkUserMiddleware.Wrap(recipeControllers.Delete)))
+
+	router.GET("/api/check-user", jwtMiddleware.Wrap(loginController.CheckUser))
+	router.GET("/api/profile", jwtMiddleware.Wrap(loginController.GetProfile))
 
 	router.PanicHandler = exception.ErrorHandler
 	router.MethodNotAllowed = http.HandlerFunc(exception.NotAllowedError)

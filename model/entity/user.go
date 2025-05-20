@@ -2,15 +2,15 @@ package entity
 
 type User struct {
 	Column []string
-	Entity string
 	Id     int
 	Name   string
 	Email string
 	Password string
+	IsAdmin int
 }
 
 func (user *User) GetEntityName() string {
-	return user.Entity
+	return "users"
 }
 
 func (user *User) GetColumn() []string {

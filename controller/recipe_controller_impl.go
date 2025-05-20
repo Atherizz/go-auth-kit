@@ -11,17 +11,17 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-type CategoryControllerImpl struct {
+type RecipeControllerImpl struct {
 	RecipeService service.RecipeService
 }
 
-func NewCategoryController(RecipeService service.RecipeService) *CategoryControllerImpl {
-	return &CategoryControllerImpl{
+func NewRecipeController(RecipeService service.RecipeService) *RecipeControllerImpl {
+	return &RecipeControllerImpl{
 		RecipeService: RecipeService,
 	}
 }
 
-func (controller *CategoryControllerImpl) Create(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (controller *RecipeControllerImpl) Create(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 
 	decoder := json.NewDecoder(request.Body)
 	recipeCreateRequest := web.RecipeRequest{}
@@ -40,7 +40,7 @@ func (controller *CategoryControllerImpl) Create(writer http.ResponseWriter, req
 }
 
 
-func (controller *CategoryControllerImpl) Delete(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (controller *RecipeControllerImpl) Delete(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 
 	recipeId := params.ByName("recipeId")
 	id, err := strconv.Atoi(recipeId)
@@ -55,7 +55,7 @@ func (controller *CategoryControllerImpl) Delete(writer http.ResponseWriter, req
 	helper.WriteEncodeResponse(writer, webResponse)
 }
 
-func (controller *CategoryControllerImpl) FindById(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (controller *RecipeControllerImpl) FindById(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 
 	recipeId := params.ByName("recipeId")
 	id, err := strconv.Atoi(recipeId)
@@ -72,7 +72,7 @@ func (controller *CategoryControllerImpl) FindById(writer http.ResponseWriter, r
 }
 
 
-func (controller *CategoryControllerImpl) FindAll(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (controller *RecipeControllerImpl) FindAll(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 
 	keyword := request.URL.Query().Get("search")
 

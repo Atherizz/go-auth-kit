@@ -18,7 +18,7 @@ type RecipeServiceImpl struct {
 	Validate         *validator.Validate
 }
 
-func NewCategoryService(RecipeRepository repository.RecipeRepository, db *sql.DB, validate *validator.Validate) *RecipeServiceImpl {
+func NewRecipeService(RecipeRepository repository.RecipeRepository, db *sql.DB, validate *validator.Validate) *RecipeServiceImpl {
 	return &RecipeServiceImpl{
 		RecipeRepository: RecipeRepository,
 		DB:               db,
@@ -53,14 +53,14 @@ func (service *RecipeServiceImpl) Search(ctx context.Context, keyword string) []
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
 
-	categories, err := service.RecipeRepository.Search(ctx, tx, keyword)
+	recipes, err := service.RecipeRepository.Search(ctx, tx, keyword)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
 	var recipesResponse []web.RecipeResponse
 
-	for _, recipe := range categories {
+	for _, recipe := range recipes {
 		recipesResponse = append(recipesResponse, helper.ToRecipeResponse(recipe))
 	}
 
@@ -87,11 +87,11 @@ func (service *RecipeServiceImpl) Show(ctx context.Context) []web.RecipeResponse
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
 
-	categories := service.RecipeRepository.GetAll(ctx, tx)
+	recipes := service.RecipeRepository.GetAll(ctx, tx)
 	var recipesResponse []web.RecipeResponse
 
-	for _, category := range categories {
-		recipesResponse = append(recipesResponse, helper.ToRecipeResponse(category))
+	for _, recipe := range recipes {
+		recipesResponse = append(recipesResponse, helper.ToRecipeResponse(recipe))
 	}
 
 	return recipesResponse
