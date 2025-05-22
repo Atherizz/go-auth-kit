@@ -13,16 +13,16 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func NewRouter(categoryControllers, userControllers controller.EntityController[web.EntityRequest, entity.NamedEntity, web.EntityResponse], loginController controller.LoginController, recipeControllers controller.RecipeController, db *sql.DB) *httprouter.Router {
+func NewRouter(categoryControllers, userControllers controller.EntityController[web.EntityRequest, entity.NamedEntity, web.EntityResponse], authController controller.AuthController, recipeControllers controller.RecipeController, db *sql.DB) *httprouter.Router {
 	router := httprouter.New()
 
-	router.POST("/api/register", userControllers.Create)
-	router.POST("/api/login", loginController.Login)
+	router.POST("/api/register", authController.Register)
+	router.GET("/api/verify-email", authController.VerifyUser)
+	router.POST("/api/login", authController.Login)
 
 	jwtMiddleware := middleware.NewJwtAuthMiddleware(router)
 	adminMiddleware := middleware.NewAdminAuthMiddleware(router,db)
 	checkUserMiddleware := middleware.NewCheckUserMiddleware(router)
-
 
 	router.GET("/api/categories", jwtMiddleware.Wrap(categoryControllers.FindAll))
 	router.GET("/api/categories/:entityId", jwtMiddleware.Wrap(categoryControllers.FindById))
@@ -40,8 +40,8 @@ func NewRouter(categoryControllers, userControllers controller.EntityController[
 	router.POST("/api/recipes", jwtMiddleware.Wrap(recipeControllers.Create))
 	router.DELETE("/api/recipes/:recipeId", jwtMiddleware.Wrap(checkUserMiddleware.Wrap(recipeControllers.Delete)))
 
-	router.GET("/api/check-user", jwtMiddleware.Wrap(loginController.CheckUser))
-	router.GET("/api/profile", jwtMiddleware.Wrap(loginController.GetProfile))
+	router.GET("/api/check-user", jwtMiddleware.Wrap(authController.CheckUser))
+	router.GET("/api/profile", jwtMiddleware.Wrap(authController.GetProfile))
 
 	router.PanicHandler = exception.ErrorHandler
 	router.MethodNotAllowed = http.HandlerFunc(exception.NotAllowedError)

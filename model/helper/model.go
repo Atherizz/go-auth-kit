@@ -14,12 +14,14 @@ func ToEntityResponse[S entity.NamedEntity, R web.EntityResponse](model S, const
 	return response
 }
 
-func ToUserResponse(user entity.User) web.UserResponse {
+func ToUserResponse(user entity.User, registerToken string) web.UserResponse {
 	return web.UserResponse{
 		Id:       user.Id,
 		Name:     user.Name,
 		Email:    user.Email,
 		Password: user.Password,
+		RegisterToken: registerToken,
+		VerifyToken: user.VerifyToken,
 	}
 }
 

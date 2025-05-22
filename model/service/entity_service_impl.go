@@ -48,8 +48,11 @@ func (service *EntityServiceImpl[T, S, R]) Create(ctx context.Context, request T
 	modelResult := service.Repository.Create(ctx, tx, model)
 	log.Printf("Created model: %+v\n", modelResult)
 
+
 	result := helper.ToEntityResponse[S, R](modelResult, service.ResponseConstructor)
 	log.Printf("Converted response: %+v\n", result)
+
+
 
 	return result
 }

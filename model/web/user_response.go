@@ -6,6 +6,8 @@ type UserResponse struct {
 	Name   string `json:"name"`
 	Email string `json:"email"`
 	Password string `json:"-"`
+	RegisterToken string `json:"register_token"`
+	VerifyToken string `json:"verify_token"`
 }
 
 func (model *UserResponse) GetEntityName() string {

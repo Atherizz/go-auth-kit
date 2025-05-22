@@ -38,9 +38,9 @@ func main() {
 		Column: []string{"name", "email", "password_hash"},
 	})
 
-	loginRepository := repository.NewLoginRepository()
-	loginService := service.NewLoginService(loginRepository, db, validate)
-	loginController := controller.NewLoginController(loginService)
+	loginRepository := repository.NewAuthRepository()
+	loginService := service.NewAuthService(loginRepository, db, validate)
+	loginController := controller.NewAuthController(loginService)
 
 	recipeRepository := repository.NewRecipeRepository()
 	recipeService := service.NewRecipeService(recipeRepository,db,validate)

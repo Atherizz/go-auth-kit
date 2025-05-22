@@ -7,6 +7,8 @@ type User struct {
 	Email string
 	Password string
 	IsAdmin int
+	IsVerify int
+	VerifyToken string
 }
 
 func (user *User) GetEntityName() string {

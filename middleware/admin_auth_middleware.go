@@ -36,7 +36,7 @@ func (m *AdminAuthMiddleware) Wrap(next httprouter.Handle) httprouter.Handle {
 			return
 		}
         
-		userRepo := repository.NewLoginRepository()
+		userRepo := repository.NewAuthRepository()
 
 		tx, err := m.DB.Begin()
 		if err != nil {
