@@ -20,7 +20,7 @@ func NewRouter(categoryControllers, userControllers controller.EntityController[
 	router.GET("/api/verify-email", authController.VerifyUser)
 	router.POST("/api/login", authController.Login)
 
-	jwtMiddleware := middleware.NewJwtAuthMiddleware(router)
+	jwtMiddleware := middleware.NewJwtAuthMiddleware(router,db)
 	adminMiddleware := middleware.NewAdminAuthMiddleware(router,db)
 	checkUserMiddleware := middleware.NewCheckUserMiddleware(router)
 

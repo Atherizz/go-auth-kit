@@ -8,6 +8,7 @@ import (
 	"golang-restful-api/model/web"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -47,6 +48,7 @@ func (controller *AuthControllerImpl) Login(writer http.ResponseWriter, request 
 	helper.PanicError(err)
 
 	response, err := controller.AuthService.CheckCredentials(request.Context(), loginRequest)
+	// fmt.Fprint(writer, response.Data)
 
 	if err != nil {
 		webResponse := web.WebResponse{
@@ -123,6 +125,7 @@ func (controller *AuthControllerImpl) VerifyUser(writer http.ResponseWriter, req
 	user, err := controller.AuthService.GetByColumn(request.Context(), keyword, "verify_token")
 	token := user.VerifyToken
 
+
 	if keyword != token || err != nil {
 		webResponse := web.WebResponse{
 			Code:   401,
@@ -132,6 +135,30 @@ func (controller *AuthControllerImpl) VerifyUser(writer http.ResponseWriter, req
 		helper.WriteEncodeResponse(writer, webResponse)
 		return
 	}
+
+	if time.Now().After(user.ExpiredAt) {
+		webResponse := web.WebResponse{
+			Code:   401,
+			Status: "Token already expired!",
+			Data:   nil,
+		}
+		helper.WriteEncodeResponse(writer, webResponse)
+		return
+	}
+
+	
+
+	if user.IsVerify == 1 {
+		webResponse := web.WebResponse{
+			Code:   200,
+			Status: "User already verified",
+			Data:   nil,
+		}
+		helper.WriteEncodeResponse(writer, webResponse)
+		return
+	}
+
+	
 
 	verifyUser, err := controller.AuthService.SetVerified(request.Context(), token)
 	if err != nil {

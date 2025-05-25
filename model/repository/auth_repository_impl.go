@@ -8,6 +8,7 @@ import (
 	"golang-restful-api/model/helper"
 	"log"
 
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -19,7 +20,7 @@ func NewAuthRepository() *AuthRepositoryImpl {
 }
 
 func (repo *AuthRepositoryImpl) GetByColumn(ctx context.Context, tx *sql.Tx, data string, column string) (entity.User, error) {
-	script := "SELECT id,name,email,password_hash,is_admin,is_verified,verify_token FROM users WHERE " + column + " = (?)"
+	script := "SELECT id,name,email,password_hash,is_admin,is_verified,verify_token,token_expired_at FROM users WHERE " + column + " = (?)"
 	result, err := tx.QueryContext(ctx, script, data)
 	helper.PanicError(err)
 
@@ -27,8 +28,10 @@ func (repo *AuthRepositoryImpl) GetByColumn(ctx context.Context, tx *sql.Tx, dat
 
 	user := entity.User{}
 	if result.Next() {
-		err := result.Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.IsAdmin, &user.IsVerify, &user.VerifyToken)
-		helper.PanicError(err)
+		err := result.Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.IsAdmin, &user.IsVerify, &user.VerifyToken, &user.ExpiredAt)
+		if err != nil {
+			return user, err
+		}
 		return user, nil
 	}
 
@@ -36,7 +39,7 @@ func (repo *AuthRepositoryImpl) GetByColumn(ctx context.Context, tx *sql.Tx, dat
 }
 
 func (repo *AuthRepositoryImpl) GetById(ctx context.Context, tx *sql.Tx, id int) (entity.User, error) {
-	script := "SELECT id,name,email,password_hash,is_admin,is_verified,verify_token FROM users WHERE id = (?)"
+	script := "SELECT id,name,email,password_hash,is_admin,is_verified,verify_token,token_expired_at FROM users WHERE id = (?)"
 	result, err := tx.QueryContext(ctx, script, id)
 	helper.PanicError(err)
 
@@ -44,7 +47,7 @@ func (repo *AuthRepositoryImpl) GetById(ctx context.Context, tx *sql.Tx, id int)
 
 	user := entity.User{}
 	if result.Next() {
-		err := result.Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.IsAdmin, &user.IsVerify, &user.VerifyToken)
+		err := result.Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.IsAdmin, &user.IsVerify, &user.VerifyToken, &user.ExpiredAt)
 		helper.PanicError(err)
 		return user, nil
 	}
@@ -53,12 +56,13 @@ func (repo *AuthRepositoryImpl) GetById(ctx context.Context, tx *sql.Tx, id int)
 }
 
 func (repo *AuthRepositoryImpl) Register(ctx context.Context, tx *sql.Tx, user entity.User) entity.User {
-	script := "INSERT INTO users(name,email,password_hash,verify_token) VALUES (?,?,?,?)"
+	script := "INSERT INTO users(name,email,password_hash,verify_token,token_expired_at) VALUES (?,?,?,?,?)"
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	helper.PanicError(err)
 	hashedString := string(hashedPassword)
+	// expiredAt := time.Now().Add(15 * time.Minute) 
 
-	result, err := tx.ExecContext(ctx, script, user.Name, user.Email, hashedString, user.VerifyToken)
+	result, err := tx.ExecContext(ctx, script, user.Name, user.Email, hashedString, user.VerifyToken, user.ExpiredAt)
 	helper.PanicError(err)
 
 	id, err := result.LastInsertId()

@@ -1,18 +1,22 @@
 package entity
 
+import "time"
+
 type User struct {
-	Column []string
-	Id     int
-	Name   string
-	Email string
-	Password string
-	IsAdmin int
-	IsVerify int
+	Column      []string
+	Id          int
+	Name        string
+	Email       string
+	Password    string
+	IsAdmin     int
+	IsVerify    int
 	VerifyToken string
+	ExpiredAt   time.Time
 }
 
 func (user *User) GetEntityName() string {
 	return "users"
+
 }
 
 func (user *User) GetColumn() []string {
@@ -53,9 +57,9 @@ func (user *User) SetPassword(password string) {
 
 func (user *User) Clone() interface{} {
 	return &User{
-		Id:   user.Id,
-		Name: user.Name,
-		Email: user.Email,
+		Id:       user.Id,
+		Name:     user.Name,
+		Email:    user.Email,
 		Password: user.Password,
 	}
 }

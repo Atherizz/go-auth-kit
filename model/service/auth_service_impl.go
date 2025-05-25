@@ -8,6 +8,7 @@ import (
 	"golang-restful-api/model/repository"
 	"golang-restful-api/model/web"
 	"log"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -43,7 +44,8 @@ func (service *AuthServiceImpl) CheckCredentials(ctx context.Context, request we
 	if err != nil {
 		return web.LoginResponse{}, err
 	}
-	userResponse := helper.ToUserResponse(user, "")
+	userResponse := helper.ToUserResponse(user)
+
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
 	if err != nil {
@@ -83,7 +85,7 @@ func (service *AuthServiceImpl) GetByColumn(ctx context.Context, data string, co
 		return web.UserResponse{}, err
 	}
 
-	userResponse := helper.ToUserResponse(user, "")
+	userResponse := helper.ToUserResponse(user)
 	return userResponse, nil
 }
 
@@ -104,7 +106,7 @@ func (service *AuthServiceImpl) GetById(ctx context.Context, id int) (web.UserRe
 		return web.UserResponse{}, err
 	}
 
-	userResponse := helper.ToUserResponse(user, "")
+	userResponse := helper.ToUserResponse(user)
 	return userResponse, nil
 }
 
@@ -123,11 +125,13 @@ func (service *AuthServiceImpl) Register(ctx context.Context, request web.UserRe
 		Email:       request.Email,
 		Password:    request.Password,
 		VerifyToken: token,
+		ExpiredAt: time.Now().Add(15 * time.Minute),
 	}
 
 	user = service.Repository.Register(ctx, tx, user)
 
-	return helper.ToUserResponse(user, token)
+
+	return helper.ToUserResponse(user)
 
 }
 
@@ -151,6 +155,5 @@ func (service *AuthServiceImpl) SetVerified(ctx context.Context, token string) (
 		return web.UserResponse{}, err
 	}
 
-	return helper.ToUserResponse(user, ""), nil
-
+	return helper.ToUserResponse(user), nil
 }

@@ -1,9 +1,11 @@
 package test
 
 import (
+	"fmt"
+	"testing"
+	"time"
 )
 
-// func TestCategoryController(t *testing.T) {
-// 	validate := validator.New(validator.WithRequiredStructEnabled()) 
-// 	controller, _ := google_wire.InitializeCategoryController(validate)
-// }
+func TestTimeZone(t *testing.T) {
+	fmt.Println("Now:", time.Now())
+}

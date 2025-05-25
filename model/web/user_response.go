@@ -1,13 +1,16 @@
 package web
 
+import "time"
+
 type UserResponse struct {
-	Entity string `json:"-"`
-	Id     int    `json:"id"`
-	Name   string `json:"name"`
-	Email string `json:"email"`
-	Password string `json:"-"`
-	RegisterToken string `json:"register_token"`
+	Entity      string `json:"-"`
+	Id          int    `json:"id"`
+	Name        string `json:"name"`
+	Email       string `json:"email"`
+	Password    string `json:"-"`
+	IsVerify    int    `json:"verify_status"`
 	VerifyToken string `json:"verify_token"`
+	ExpiredAt   time.Time `json:"token_expired_at"`
 }
 
 func (model *UserResponse) GetEntityName() string {
@@ -29,7 +32,3 @@ func (model *UserResponse) SetEmail(email string) {
 func (model *UserResponse) SetPassword(password string) {
 	model.Password = password
 }
-
-
-
-
