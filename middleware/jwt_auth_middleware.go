@@ -15,13 +15,13 @@ import (
 
 type JwtAuthMiddlewareImpl struct {
 	Handler http.Handler
-	DB *sql.DB
+	DB      *sql.DB
 }
 
 func NewJwtAuthMiddleware(handler http.Handler, db *sql.DB) *JwtAuthMiddlewareImpl {
 	return &JwtAuthMiddlewareImpl{
 		Handler: handler,
-		DB: db,
+		DB:      db,
 	}
 }
 
@@ -35,8 +35,6 @@ func (m *JwtAuthMiddlewareImpl) Wrap(next httprouter.Handle) httprouter.Handle {
 			})
 			return
 		}
-
-
 		secretKey := helper.LoadEnv("JWT_SECRET")
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 		claims := jwt.MapClaims{}
@@ -52,28 +50,27 @@ func (m *JwtAuthMiddlewareImpl) Wrap(next httprouter.Handle) httprouter.Handle {
 			return
 		}
 
-		
 		userID := int(claims["id"].(float64))
 
 		userRepo := repository.NewAuthRepository()
 
-        tx, err := m.DB.Begin()
-        if err != nil {
-            helper.PanicError(err)
-            return
-        }
-        defer tx.Rollback()
+		tx, err := m.DB.Begin()
+		if err != nil {
+			helper.PanicError(err)
+			return
+		}
+		defer tx.Rollback()
 
-        user, err := userRepo.GetById(request.Context(), tx, userID)
-        helper.PanicError(err)
+		user, err := userRepo.GetById(request.Context(), tx, userID)
+		helper.PanicError(err)
 
-        if user.IsVerify == 0 {
-                helper.WriteEncodeResponse(writer, web.WebResponse{
-                Code:   http.StatusUnauthorized,
-                Status: "Email Not Verified!",
-            })
-            return
-        }
+		if user.IsVerify == 0 {
+			helper.WriteEncodeResponse(writer, web.WebResponse{
+				Code:   http.StatusUnauthorized,
+				Status: "Email Not Verified!",
+			})
+			return
+		}
 
 		ctx := context.WithValue(request.Context(), "userId", userID)
 		ctx = context.WithValue(ctx, "email", claims["email"].(string))

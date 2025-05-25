@@ -7,8 +7,9 @@ import (
 	"golang-restful-api/model/entity"
 	"golang-restful-api/model/helper"
 	"log"
+	"time"
 
-
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -96,4 +97,32 @@ func (repo *AuthRepositoryImpl) SetVerified(ctx context.Context, tx *sql.Tx, tok
 	}
 	log.Printf("User retrieved after verification: %+v", res)
 	return res, nil
+}
+
+func (repo *AuthRepositoryImpl) ResendVerifyToken(ctx context.Context, tx *sql.Tx, email string) (entity.User,error) {
+	script := "UPDATE users SET verify_token = (?), token_expired_at = (?) WHERE email = (?)"
+
+	token := uuid.NewString()
+	expiredAt := time.Now().Add(15 * time.Minute) 
+
+	result, err := tx.ExecContext(ctx, script, token, expiredAt, email)
+	if err != nil {
+		return entity.User{}, err
+	}
+	row, err := result.RowsAffected()
+	if err != nil {
+		return entity.User{}, err
+	}
+
+	if row == 0 {
+		return entity.User{}, errors.New("no row affected")
+	}
+
+	res, err := repo.GetByColumn(ctx,tx,email,"email")
+	if err != nil {
+		return entity.User{}, err
+	}
+	
+	return res, nil
+
 }

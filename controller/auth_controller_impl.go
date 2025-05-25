@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -146,8 +145,6 @@ func (controller *AuthControllerImpl) VerifyUser(writer http.ResponseWriter, req
 		return
 	}
 
-	
-
 	if user.IsVerify == 1 {
 		webResponse := web.WebResponse{
 			Code:   200,
@@ -157,8 +154,6 @@ func (controller *AuthControllerImpl) VerifyUser(writer http.ResponseWriter, req
 		helper.WriteEncodeResponse(writer, webResponse)
 		return
 	}
-
-	
 
 	verifyUser, err := controller.AuthService.SetVerified(request.Context(), token)
 	if err != nil {
@@ -177,4 +172,32 @@ func (controller *AuthControllerImpl) VerifyUser(writer http.ResponseWriter, req
 		Data:   verifyUser,
 	}
 	helper.WriteEncodeResponse(writer, webResponse)
+}
+
+func (controller *AuthControllerImpl) ResendVerifyToken(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	decoder := json.NewDecoder(request.Body)
+	emailRequest := web.EmailRequest{}
+	err := decoder.Decode(&emailRequest)
+	helper.PanicError(err)
+
+	response, err := controller.AuthService.ResendVerifyToken(request.Context(), emailRequest.Email)
+	if err != nil {
+		webResponse := web.WebResponse{
+		Code:   400,
+		Status: "Email Not Found / Not registered",
+		Data:   nil,
+	}
+	helper.WriteEncodeResponse(writer, webResponse)
+	return
+	}
+
+	webResponse := web.WebResponse{
+		Code:   200,
+		Status: "Resend Verification token success",
+		Data:   response,
+	}
+
+	helper.WriteEncodeResponse(writer, webResponse)
+
+
 }

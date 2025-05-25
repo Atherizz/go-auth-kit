@@ -11,4 +11,5 @@ type AuthController interface {
 	CheckUser(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 	GetProfile(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 	VerifyUser(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
+	ResendVerifyToken(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 }

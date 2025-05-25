@@ -157,3 +157,28 @@ func (service *AuthServiceImpl) SetVerified(ctx context.Context, token string) (
 
 	return helper.ToUserResponse(user), nil
 }
+
+func (service *AuthServiceImpl) ResendVerifyToken(ctx context.Context, email string) (web.UserResponse,error) {
+	err := service.Validate.Var(email, "required,email")
+	if err != nil {
+		return web.UserResponse{}, err
+	}
+
+	tx, err := service.DB.Begin()
+	if err != nil {
+		log.Println("Error starting transaction:", err)
+		return web.UserResponse{}, err
+	}
+	defer helper.CommitOrRollback(tx)
+
+	user, err := service.Repository.ResendVerifyToken(ctx,tx,email)
+	if err != nil {
+		return web.UserResponse{}, err
+	}
+
+	return helper.ToUserResponse(user), nil
+
+
+
+
+}
