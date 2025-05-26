@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -124,11 +125,20 @@ func (controller *AuthControllerImpl) VerifyUser(writer http.ResponseWriter, req
 	user, err := controller.AuthService.GetByColumn(request.Context(), keyword, "verify_token")
 	token := user.VerifyToken
 
-
-	if keyword != token || err != nil {
+	if err != nil {
 		webResponse := web.WebResponse{
 			Code:   401,
 			Status: "Unauthorized",
+			Data:   nil,
+		}
+		helper.WriteEncodeResponse(writer, webResponse)
+		return
+	}
+
+	if keyword != token {
+		webResponse := web.WebResponse{
+			Code:   401,
+			Status: "Token false!",
 			Data:   nil,
 		}
 		helper.WriteEncodeResponse(writer, webResponse)
@@ -198,6 +208,79 @@ func (controller *AuthControllerImpl) ResendVerifyToken(writer http.ResponseWrit
 	}
 
 	helper.WriteEncodeResponse(writer, webResponse)
+}
 
+func (controller *AuthControllerImpl) ForgotPassword(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	decoder := json.NewDecoder(request.Body)
+	emailRequest := web.EmailRequest{}
+	err := decoder.Decode(&emailRequest)
+	helper.PanicError(err)
 
+	response, err := controller.AuthService.ForgotPassword(request.Context(), emailRequest.Email)
+	if err != nil {
+		webResponse := web.WebResponse{
+		Code:   400,
+		Status: "Email Not Found / Not registered",
+		Data:   nil,
+	}
+	helper.WriteEncodeResponse(writer, webResponse)
+	return
+	}
+
+	webResponse := web.WebResponse{
+		Code:   200,
+		Status: "Send Reset token success",
+		Data:   response,
+	}
+
+	helper.WriteEncodeResponse(writer, webResponse)
+}
+
+func (controller *AuthControllerImpl) ResetPassword(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	decoder := json.NewDecoder(request.Body)
+	resetPasswordRequest := web.ResetPasswordRequest{}
+	err := decoder.Decode(&resetPasswordRequest)
+	helper.PanicError(err)
+
+	token := request.URL.Query().Get("token")
+
+	user, err := controller.AuthService.GetByColumn(request.Context(), token, "reset_token")
+	if err != nil {
+		webResponse := web.WebResponse{
+			Code:   401,
+			Status: "Unauthorized",
+			Data:   nil,
+		}
+		helper.WriteEncodeResponse(writer, webResponse)
+		return
+	}
+
+	if time.Now().After(user.ResetExpiredAt) {
+		webResponse := web.WebResponse{
+			Code:   401,
+			Status: "Token already expired!",
+			Data:   nil,
+		}
+		helper.WriteEncodeResponse(writer, webResponse)
+		return
+	}
+
+	err = controller.AuthService.ResetPassword(request.Context(), resetPasswordRequest, token)
+	if err != nil {
+		webResponse := web.WebResponse{
+		Code:   400,
+		Status: "Reset Password Failed!",
+		Data:   nil,
+	}
+	helper.WriteEncodeResponse(writer, webResponse)
+	return
+	}
+
+	webResponse := web.WebResponse{
+		Code:   200,
+		Status: "OK",
+		Data:   "Reset Password Success!",
+	}
+
+	helper.WriteEncodeResponse(writer, webResponse)
 }

@@ -1,17 +1,22 @@
 package entity
 
-import "time"
+import (
+	"database/sql"
+	"time"
+)
 
 type User struct {
-	Column      []string
-	Id          int
-	Name        string
-	Email       string
-	Password    string
-	IsAdmin     int
-	IsVerify    int
-	VerifyToken string
-	ExpiredAt   time.Time
+	Column         []string
+	Id             int
+	Name           string
+	Email          string
+	Password       string
+	IsAdmin        int
+	IsVerify       int
+	VerifyToken    string
+	ExpiredAt      time.Time
+	ResetToken     sql.NullString
+	ResetExpiredAt sql.NullTime
 }
 
 func (user *User) GetEntityName() string {

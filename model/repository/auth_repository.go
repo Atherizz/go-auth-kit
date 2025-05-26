@@ -12,4 +12,6 @@ type AuthRepository interface {
 	Register(ctx context.Context, tx *sql.Tx, user entity.User) (entity.User)
 	SetVerified(ctx context.Context, tx *sql.Tx, token string) (entity.User,error)
 	ResendVerifyToken(ctx context.Context, tx *sql.Tx, email string) (entity.User,error)
+	ForgotPassword(ctx context.Context, tx *sql.Tx, email string) (entity.User,error)
+ 	ResetPassword(ctx context.Context, tx *sql.Tx, newPassword string, token string) error
 }

@@ -1,0 +1,1 @@
+ALTER TABLE users DROP COLUMN reset_token,reset_token_expired_at;

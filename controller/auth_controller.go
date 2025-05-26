@@ -12,4 +12,6 @@ type AuthController interface {
 	GetProfile(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 	VerifyUser(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 	ResendVerifyToken(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
+	ForgotPassword(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
+	ResetPassword(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 }

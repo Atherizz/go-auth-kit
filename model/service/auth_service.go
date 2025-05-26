@@ -11,5 +11,7 @@ type AuthService interface {
 	GetByColumn(ctx context.Context, data string, column string) (web.UserResponse, error)
 	Register(ctx context.Context, request web.UserRequest) web.UserResponse
 	SetVerified(ctx context.Context, token string) (web.UserResponse,error)
-	ResendVerifyToken(ctx context.Context, email string) (web.UserResponse,error)
+	ResendVerifyToken(ctx context.Context, email string) (web.VerifyTokenResponse,error)
+	ForgotPassword(ctx context.Context, email string) (web.ResetTokenResponse,error)
+	ResetPassword(ctx context.Context, request web.ResetPasswordRequest, token string) error
 }

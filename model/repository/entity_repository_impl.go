@@ -229,7 +229,6 @@ func (repo *EntityRepositoryImpl[T]) Update(ctx context.Context, tx *sql.Tx, mod
 
 	res, _ := repo.GetById(ctx, tx, model.GetId(), model)
 	return res, nil
-
 }
 
 func (repo *EntityRepositoryImpl[T]) Delete(ctx context.Context, tx *sql.Tx, id int32, model T) error {

@@ -158,27 +158,69 @@ func (service *AuthServiceImpl) SetVerified(ctx context.Context, token string) (
 	return helper.ToUserResponse(user), nil
 }
 
-func (service *AuthServiceImpl) ResendVerifyToken(ctx context.Context, email string) (web.UserResponse,error) {
+func (service *AuthServiceImpl) ResendVerifyToken(ctx context.Context, email string) (web.VerifyTokenResponse,error) {
 	err := service.Validate.Var(email, "required,email")
 	if err != nil {
-		return web.UserResponse{}, err
+		return web.VerifyTokenResponse{}, err
 	}
 
 	tx, err := service.DB.Begin()
 	if err != nil {
 		log.Println("Error starting transaction:", err)
-		return web.UserResponse{}, err
+		return web.VerifyTokenResponse{}, err
 	}
 	defer helper.CommitOrRollback(tx)
 
 	user, err := service.Repository.ResendVerifyToken(ctx,tx,email)
 	if err != nil {
-		return web.UserResponse{}, err
+		return web.VerifyTokenResponse{}, err
 	}
 
-	return helper.ToUserResponse(user), nil
+	return helper.ToVerifyTokenResponse(user), nil
+}
 
+func (service *AuthServiceImpl) ForgotPassword(ctx context.Context, email string) (web.ResetTokenResponse,error) {
+	err := service.Validate.Var(email, "required,email")
+	if err != nil {
+		return web.ResetTokenResponse{}, err
+	}
 
+	tx, err := service.DB.Begin()
+	if err != nil {
+		log.Println("Error starting transaction:", err)
+		return web.ResetTokenResponse{}, err
+	}
+	defer helper.CommitOrRollback(tx)
 
+	user, err := service.Repository.ForgotPassword(ctx,tx,email)
+	if err != nil {
+		return web.ResetTokenResponse{}, err
+	}
+	return helper.ToResetTokenResponse(user), nil
+}
+
+func (service *AuthServiceImpl) ResetPassword(ctx context.Context, request web.ResetPasswordRequest, token string) error {
+	err := service.Validate.Struct(request)
+	if err != nil {
+		return err
+	}
+	err = service.Validate.Var(token, "required")
+	if err != nil {
+		return err
+	}
+
+	tx, err := service.DB.Begin()
+	if err != nil {
+		log.Println("Error starting transaction:", err)
+		return err
+	}
+	defer helper.CommitOrRollback(tx)
+
+	err = service.Repository.ResetPassword(ctx, tx, request.NewPassword, token)
+	if err != nil {
+		return err
+	}
+
+	return nil
 
 }

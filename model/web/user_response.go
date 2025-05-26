@@ -11,6 +11,8 @@ type UserResponse struct {
 	IsVerify    int    `json:"verify_status"`
 	VerifyToken string `json:"verify_token"`
 	ExpiredAt   time.Time `json:"token_expired_at"`
+	ResetToken string `json:"reset_token"`
+	ResetExpiredAt time.Time `json:"reset_token_expired_at"`
 }
 
 func (model *UserResponse) GetEntityName() string {
