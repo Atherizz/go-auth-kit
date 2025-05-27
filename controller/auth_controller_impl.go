@@ -284,3 +284,38 @@ func (controller *AuthControllerImpl) ResetPassword(writer http.ResponseWriter, 
 
 	helper.WriteEncodeResponse(writer, webResponse)
 }
+
+func (controller *AuthControllerImpl) ChangePassword(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+
+	decoder := json.NewDecoder(request.Body)
+	resetPasswordRequest := web.ResetPasswordRequest{}
+	err := decoder.Decode(&resetPasswordRequest)
+	helper.PanicError(err)
+
+	userId := request.Context().Value("userId")
+	if userId == nil {
+		http.Error(writer, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userID := userId.(int)
+
+	err = controller.AuthService.ChangePassword(request.Context(), resetPasswordRequest, userID)
+	if err != nil {
+		webResponse := web.WebResponse{
+		Code:   400,
+		Status: "Change Password Failed!",
+		Data:   nil,
+	}
+	helper.WriteEncodeResponse(writer, webResponse)
+	return
+	}
+
+	webResponse := web.WebResponse{
+		Code:   200,
+		Status: "OK",
+		Data:   "Change Password Success!",
+	}
+
+	helper.WriteEncodeResponse(writer, webResponse)
+}

@@ -1,56 +1,434 @@
-
 {
-    "openapi":"3.0.3",
+    "openapi": "3.0.3",
     "info": {
-      "title":"Meal Plan RESTful API",
-      "description": "API spec for Meal Plan Application",
-      "version":"1.0"
+        "title": "Meal Plan RESTful API",
+        "description": "API spec for Meal Plan Application",
+        "version": "1.0"
     },
     "servers": [
-      {"url":"https://localhost:8000/api"}
+        {
+            "url": "/api"
+        }
     ],
     "paths": {
-        "/categories" : {
-            "get" :{
+        "/register": {
+            "post": {
+                "tags": [
+                    "Auth API"
+                ],
+                "description": "Register New User",
+                "summary": "Register New User",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    },
+                                    "confirm_password": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": ["name", "email", "password", "confirm_password"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success Register User",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/verify-email": {
+            "get": {
+                "tags": [
+                    "Auth API"
+                ],
+                "description": "Verify user email",
+                "summary": "Verify Email",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "name": "token",
+                        "in": "query",
+                        "description": "Verification token"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Email verified successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "tags": [
+                    "Auth API"
+                ],
+                "description": "Login User",
+                "summary": "Login User",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": ["email", "password"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success Login User",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        },
+                                        "token": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/resend-verification": {
+            "post": {
+                "tags": [
+                    "Auth API"
+                ],
+                "description": "Resend verification email",
+                "summary": "Resend Verification",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": ["email"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Verification email resent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/forgot-password": {
+            "post": {
+                "tags": [
+                    "Auth API"
+                ],
+                "description": "Request password reset",
+                "summary": "Forgot Password",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": ["email"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password reset email sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reset-password": {
+            "post": {
+                "tags": [
+                    "Auth API"
+                ],
+                "description": "Reset user password",
+                "summary": "Reset Password",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "token": {
+                                        "type": "string"
+                                    },
+                                    "new_password": {
+                                        "type": "string"
+                                    },
+                                    "confirm_password": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": ["token", "new_password", "confirm_password"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password reset successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/change-password": {
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "tags": [
+                    "Auth API"
+                ],
+                "description": "Change user password",
+                "summary": "Change Password",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "current_password": {
+                                        "type": "string"
+                                    },
+                                    "new_password": {
+                                        "type": "string"
+                                    },
+                                    "confirm_password": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": ["current_password", "new_password", "confirm_password"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password changed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/check-user": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "tags": [
+                    "Auth API"
+                ],
+                "description": "Check user authentication status",
+                "summary": "Check User",
+                "responses": {
+                    "200": {
+                        "description": "User authentication status",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/profile": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "tags": [
+                    "Auth API"
+                ],
+                "description": "Get user profile",
+                "summary": "Get Profile",
+                "responses": {
+                    "200": {
+                        "description": "User profile data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/categories": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "tags": [
+                    "Category API"
+                ],
+                "description": "Get All Categories",
+                "summary": "List All Categories",
                 "parameters": [
                     {
                         "required": false,
-                        "schema" : {
-                            "type": "string",
-                            "description": "search by category name"
+                        "schema": {
+                            "type": "string"
                         },
                         "name": "name",
                         "in": "query",
-                        "description": "Category Name"
+                        "description": "Filter by category name"
                     }
                 ],
-                "security": [{
-                    "CategoryAuth" : []
-                }],
-                "tags": ["Category API"],
-                "description": "Get All Categories",
-                "summary": "List All Category",
                 "responses": {
-                    "200" : {
+                    "200": {
                         "description": "Success Get All Categories",
                         "content": {
-                            "application/json" : {
+                            "application/json": {
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "code" : {
+                                        "code": {
                                             "type": "number"
                                         },
-                                        "status" : {
+                                        "status": {
                                             "type": "string"
-                                         },
-                                        "data" : {
+                                        },
+                                        "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref" : "#/components/schemas/Category"
+                                                "$ref": "#/components/schemas/Category"
                                             }
                                         }
-                                        
                                     }
                                 }
                             }
@@ -58,139 +436,95 @@
                     }
                 }
             },
-            "post" : {
-            "security": [{
-                    "CategoryAuth" : []
-                }],
-            "tags": ["Category API"],
-            "description": "Create Category",
-            "summary": "Create New Category",
-            "requestBody" : {
-                "content": {
-                    "application/json" : {
-                        "schema" : {
-                            "$ref" : "#/components/schemas/CreateOrUpdateCategory"
-                        }
-                    }
-                }
-            },
-            "responses": {
-                "200" : {
-                    "description": "Success create category",
-                    "content": {
-                        "application/json" : {
-                            "schema" : {
-                                "type": "object",
-                                "properties": {
-                                    "code" : {
-                                        "type": "number"
-                                    },
-                                    "status" : {
-                                        "type": "string"
-                                    },
-                                    "data" :  {
-                                        "$ref" : "#/components/schemas/Category"
-                                    }
-
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            }
-        },
-        "/categories/{entityId}" : {
-            "get" : {
-                "security": [{
-                    "CategoryAuth" : []
-                }],
-                "tags": ["category API"],
-                "summary": "Get Category by ID", 
-                "description": "Get Category by ID",
-                "parameters": [
-                    {   
-                        "required": true,
-                        "schema" : {
-                            "type": "integer",
-                            "format": "int64"
-                        },
-                        "name": "categoryId",
-                        "in": "path",
-                        "description": "Category Id"
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    },
+                    {
+                        "Admin": []
                     }
                 ],
+                "tags": [
+                    "Category API"
+                ],
+                "description": "Create Category",
+                "summary": "Create New Category",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateOrUpdateCategory"
+                            }
+                        }
+                    }
+                },
                 "responses": {
-                    "200" : {
-                        "description": "success get category by id",
+                    "200": {
+                        "description": "Success create category",
                         "content": {
-                            "application/json" : {
-                                "schema" : {
+                            "application/json": {
+                                "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "code" : {
+                                        "code": {
                                             "type": "number"
                                         },
-                                        "status" : {
+                                        "status": {
                                             "type": "string"
                                         },
-                                        "data" :  {
-                                            "$ref" : "#/components/schemas/Category"
+                                        "data": {
+                                            "$ref": "#/components/schemas/Category"
                                         }
-    
                                     }
                                 }
                             }
                         }
                     }
                 }
-            },
-            "put" : {   
-                "security": [{
-                    "CategoryAuth" : []
-                }],
-                "tags": ["Category API"],
-                "summary": "update category by id",
-                "description": "update category by id",
+            }
+        },
+        "/categories/{entityId}": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "tags": [
+                    "Category API"
+                ],
+                "summary": "Get Category by ID",
+                "description": "Get Category by ID",
                 "parameters": [
                     {
                         "required": true,
-                        "schema" : {
+                        "schema": {
                             "type": "integer",
                             "format": "int64"
                         },
-                        "name": "categoryId",
+                        "name": "entityId",
                         "in": "path",
-                        "description": "Category Id"
+                        "description": "Category ID"
                     }
                 ],
-                "requestBody" : {
-                    "content": {
-                        "application/json" : {
-                            "schema" : {
-                                "$ref" : "#/components/schemas/CreateOrUpdateCategory"
-                            }
-                        }
-                    }
-                }, 
                 "responses": {
-                    "200" : {
-                        "description": "success get category by id",
+                    "200": {
+                        "description": "Success get category by id",
                         "content": {
-                            "application/json" : {
-                                "schema" : {
+                            "application/json": {
+                                "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "code" : {
+                                        "code": {
                                             "type": "number"
                                         },
-                                        "status" : {
+                                        "status": {
                                             "type": "string"
                                         },
-                                        "data" :  {
-                                            "$ref" : "#/components/schemas/Category"
+                                        "data": {
+                                            "$ref": "#/components/schemas/Category"
                                         }
-    
                                     }
                                 }
                             }
@@ -198,148 +532,156 @@
                     }
                 }
             },
-            "delete" : {
-                "security": [{
-                    "CategoryAuth" : []
-                }],
-                "tags": ["category API"],
-                "summary": "Delete Category by ID", 
-                "description": "Delete Category by ID",
+            "put": {
+                "security": [
+                    {
+                        "JWT": []
+                    },
+                    {
+                        "Admin": []
+                    }
+                ],
+                "tags": [
+                    "Category API"
+                ],
+                "summary": "Update category by ID",
+                "description": "Update category by ID",
                 "parameters": [
-                    {   
+                    {
                         "required": true,
-                        "schema" : {
+                        "schema": {
                             "type": "integer",
                             "format": "int64"
                         },
-                        "name": "categoryId",
+                        "name": "entityId",
                         "in": "path",
-                        "description": "Category Id"
+                        "description": "Category ID"
                     }
                 ],
-                "responses": {
-                    "200" : {
-                        "description": "success delete category by id",
-                        "content": {
-                            "application/json" : {
-                                "schema" : {
-                                    "type": "object",
-                                    "properties": {
-                                        "code" : {
-                                            "type": "number"
-                                        },
-                                        "status" : {
-                                            "type": "string"
-                                        } 
-                                    }
-                                }
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateOrUpdateCategory"
                             }
                         }
                     }
-                }
-            }
-        },
-        "/register" : {
-                      "post" : {
-            "security": [{
-                    "CategoryAuth" : []
-                }],
-            "tags": ["Category API"],
-            "description": "Register New User",
-            "summary": "Register New User",
-            "requestBody" : {
-                "content": {
-                    "application/json" : {
-                        "schema" : {
-                            "type": "object",
-                        "properties": {
-                    "id" : {
-                        "type": "number"
-                    }, 
-                    "name" : {
-                        "type": "string"
-                    },
-                    "email" : {
-                        "type": "string"
-                    },
-                    "password" : {
-                        "type": "string"
-                    },
-                    "confirm_password" : {
-                        "type": "string"
-                    }
-                }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success update category",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Category"
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             },
-            "responses": {
-                "200" : {
-                    "description": "Success create category",
-                    "content": {
-                        "application/json" : {
-                            "schema" : {
-                                "type": "object",
-                                "properties": {
-                                    "code" : {
-                                        "type": "number"
-                                    },
-                                    "status" : {
-                                        "type": "string"
-                                    },
-                                    "data" :  {
-                                        "$ref" : "#/components/schemas/Category"
+            "delete": {
+                "security": [
+                    {
+                        "JWT": []
+                    },
+                    {
+                        "Admin": []
+                    }
+                ],
+                "tags": [
+                    "Category API"
+                ],
+                "summary": "Delete category by ID",
+                "description": "Delete category by ID",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "name": "entityId",
+                        "in": "path",
+                        "description": "Category ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success delete category",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        }
                                     }
-
                                 }
                             }
                         }
                     }
                 }
             }
-            }
         },
-        "/users" : {
-            "get" :{
+        "/users": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "tags": [
+                    "User API"
+                ],
+                "description": "Get All Users",
+                "summary": "List All Users",
                 "parameters": [
                     {
                         "required": false,
-                        "schema" : {
-                            "type": "string",
-                            "description": "search by user name"
+                        "schema": {
+                            "type": "string"
                         },
                         "name": "name",
                         "in": "query",
-                        "description": "Userame"
+                        "description": "Filter by user name"
                     }
                 ],
-                "security": [{
-                    "CategoryAuth" : []
-                }],
-                "tags": ["Catgegory API"],
-                "description": "Get All Users",
-                "summary": "List All User",
                 "responses": {
-                    "200" : {
+                    "200": {
                         "description": "Success Get All Users",
                         "content": {
-                            "application/json" : {
+                            "application/json": {
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "code" : {
+                                        "code": {
                                             "type": "number"
                                         },
-                                        "status" : {
+                                        "status": {
                                             "type": "string"
-                                         },
-                                        "data" : {
+                                        },
+                                        "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref" : "#/components/schemas/Category"
+                                                "$ref": "#/components/schemas/User"
                                             }
                                         }
-                                        
                                     }
                                 }
                             }
@@ -348,97 +690,47 @@
                 }
             }
         },
-        "/users/{entityId}" : {
-            "get" : {
-                "security": [{
-                    "CategoryAuth" : []
-                }],
-                "tags": ["user API"],
-                "summary": "Get User by ID", 
-                "description": "Get User by ID",
-                "parameters": [
-                    {   
-                        "required": true,
-                        "schema" : {
-                            "type": "integer",
-                            "format": "int64"
-                        },
-                        "name": "userId",
-                        "in": "path",
-                        "description": "User Id"
+        "/users/{entityId}": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
                     }
                 ],
-                "responses": {
-                    "200" : {
-                        "description": "success get user by id",
-                        "content": {
-                            "application/json" : {
-                                "schema" : {
-                                    "type": "object",
-                                    "properties": {
-                                        "code" : {
-                                            "type": "number"
-                                        },
-                                        "status" : {
-                                            "type": "string"
-                                        },
-                                        "data" :  {
-                                            "$ref" : "#/components/schemas/Category"
-                                        }
-    
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "put" : {   
-                "security": [{
-                    "CategoryAuth" : []
-                }],
-                "tags": ["User API"],
-                "summary": "update user by id",
-                "description": "update user by id",
+                "tags": [
+                    "User API"
+                ],
+                "summary": "Get User by ID",
+                "description": "Get User by ID",
                 "parameters": [
                     {
                         "required": true,
-                        "schema" : {
+                        "schema": {
                             "type": "integer",
                             "format": "int64"
                         },
-                        "name": "userId",
+                        "name": "entityId",
                         "in": "path",
-                        "description": "User Id"
+                        "description": "User ID"
                     }
                 ],
-                "requestBody" : {
-                    "content": {
-                        "application/json" : {
-                            "schema" : {
-                                "$ref" : "#/components/schemas/CreateOrUpdateCategory"
-                            }
-                        }
-                    }
-                }, 
                 "responses": {
-                    "200" : {
-                        "description": "success get user by id",
+                    "200": {
+                        "description": "Success get user by id",
                         "content": {
-                            "application/json" : {
-                                "schema" : {
+                            "application/json": {
+                                "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "code" : {
+                                        "code": {
                                             "type": "number"
                                         },
-                                        "status" : {
+                                        "status": {
                                             "type": "string"
                                         },
-                                        "data" :  {
-                                            "$ref" : "#/components/schemas/Category"
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
                                         }
-    
                                     }
                                 }
                             }
@@ -446,39 +738,293 @@
                     }
                 }
             },
-            "delete" : {
-                "security": [{
-                    "CategoryAuth" : []
-                }],
-                "tags": ["user API"],
-                "summary": "Delete User by ID", 
-                "description": "Delete User by ID",
+            "put": {
+                "security": [
+                    {
+                        "JWT": []
+                    },
+                    {
+                        "CheckUser": []
+                    }
+                ],
+                "tags": [
+                    "User API"
+                ],
+                "summary": "Update user by ID",
+                "description": "Update user by ID",
                 "parameters": [
-                    {   
+                    {
                         "required": true,
-                        "schema" : {
+                        "schema": {
                             "type": "integer",
                             "format": "int64"
                         },
-                        "name": "userId",
+                        "name": "entityId",
                         "in": "path",
-                        "description": "User Id"
+                        "description": "User ID"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success update user",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "JWT": []
+                    },
+                    {
+                        "CheckUser": []
+                    }
+                ],
+                "tags": [
+                    "User API"
+                ],
+                "summary": "Delete user by ID",
+                "description": "Delete user by ID",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "name": "entityId",
+                        "in": "path",
+                        "description": "User ID"
                     }
                 ],
                 "responses": {
-                    "200" : {
-                        "description": "success delete user by id",
+                    "200": {
+                        "description": "Success delete user",
                         "content": {
-                            "application/json" : {
-                                "schema" : {
+                            "application/json": {
+                                "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "code" : {
+                                        "code": {
                                             "type": "number"
                                         },
-                                        "status" : {
+                                        "status": {
                                             "type": "string"
-                                        } 
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/recipes": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "tags": [
+                    "Recipe API"
+                ],
+                "description": "Get All Recipes",
+                "summary": "List All Recipes",
+                "responses": {
+                    "200": {
+                        "description": "Success Get All Recipes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Recipe"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "tags": [
+                    "Recipe API"
+                ],
+                "description": "Create Recipe",
+                "summary": "Create New Recipe",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateOrUpdateRecipe"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success create recipe",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Recipe"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/recipes/{recipeId}": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "tags": [
+                    "Recipe API"
+                ],
+                "summary": "Get Recipe by ID",
+                "description": "Get Recipe by ID",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "name": "recipeId",
+                        "in": "path",
+                        "description": "Recipe ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success get recipe by id",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Recipe"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "JWT": []
+                    },
+                    {
+                        "CheckUser": []
+                    }
+                ],
+                "tags": [
+                    "Recipe API"
+                ],
+                "summary": "Delete recipe by ID",
+                "description": "Delete recipe by ID",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        },
+                        "name": "recipeId",
+                        "in": "path",
+                        "description": "Recipe ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success delete recipe",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        }
                                     }
                                 }
                             }
@@ -490,33 +1036,149 @@
     },
     "components": {
         "securitySchemes": {
-            "CategoryAuth" : {
+            "JWT": {
                 "type": "apiKey",
                 "in": "header",
-                "name": "X-API-key",
-                "description": "authentication for Meal Plan API"
+                "name": "Authorization",
+                "description": "JWT authentication for Meal Plan API"
+            },
+            "Admin": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "Authorization",
+                "description": "Admin role required"
+            },
+            "CheckUser": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "Authorization",
+                "description": "User must own the resource or be admin"
             }
         },
         "schemas": {
-            "Category" : {
+            "Category": {
                 "type": "object",
                 "properties": {
-                    "id" : {
-                        "type": "number"
-                    }, 
-                    "name" : {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
                         "type": "string"
                     }
                 }
             },
-            "CreateOrUpdateCategory" : {
+            "User": {
                 "type": "object",
                 "properties": {
-                    "name" : {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
                         "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "verify_status": {
+                        "type": "boolean"
+                    },
+                    "verify_token": {
+                        "type": "string"
+                    },
+                    "token_expired_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "role": {
+                        "type": "string",
+                        "enum": ["user", "admin"]
                     }
                 }
+            },
+            "UserResponse": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "integer"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/User"
+                    }
+                }
+            },
+            "CreateOrUpdateCategory": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": ["name"]
+            },
+            "Recipe": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "ingredients": {
+                        "type": "string"
+                    },
+                    "instructions": {
+                        "type": "string"
+                    },
+                    "category_id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "CreateOrUpdateRecipe": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "ingredients": {
+                        "type": "string"
+                    },
+                    "instructions": {
+                        "type": "string"
+                    },
+                    "category_id": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                },
+                "required": ["name", "description", "ingredients", "instructions", "category_id"]
             }
         }
     }
-  }
+}

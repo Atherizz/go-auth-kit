@@ -14,4 +14,5 @@ type AuthService interface {
 	ResendVerifyToken(ctx context.Context, email string) (web.VerifyTokenResponse,error)
 	ForgotPassword(ctx context.Context, email string) (web.ResetTokenResponse,error)
 	ResetPassword(ctx context.Context, request web.ResetPasswordRequest, token string) error
+	ChangePassword(ctx context.Context, request web.ResetPasswordRequest, id int) error
 }

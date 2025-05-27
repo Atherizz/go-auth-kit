@@ -23,7 +23,6 @@ func NewRouter(categoryControllers, userControllers controller.EntityController[
 	router.POST("/api/forgot-password",authController.ForgotPassword)
 	router.POST("/api/reset-password",authController.ResetPassword)
 
-
 	jwtMiddleware := middleware.NewJwtAuthMiddleware(router,db)
 	adminMiddleware := middleware.NewAdminAuthMiddleware(router,db)
 	checkUserMiddleware := middleware.NewCheckUserMiddleware(router)
@@ -38,6 +37,7 @@ func NewRouter(categoryControllers, userControllers controller.EntityController[
 	router.GET("/api/users/:entityId", jwtMiddleware.Wrap(userControllers.FindById))
 	router.PUT("/api/users/:entityId", jwtMiddleware.Wrap(checkUserMiddleware.Wrap(userControllers.Update)))
 	router.DELETE("/api/users/:entityId", jwtMiddleware.Wrap(checkUserMiddleware.Wrap(userControllers.Delete)))
+	router.POST("/api/change-password",jwtMiddleware.Wrap(authController.ChangePassword))
 
 	router.GET("/api/recipes", jwtMiddleware.Wrap(recipeControllers.FindAll))
 	router.GET("/api/recipes/:recipeId", jwtMiddleware.Wrap(recipeControllers.FindById))

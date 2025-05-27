@@ -224,3 +224,28 @@ func (service *AuthServiceImpl) ResetPassword(ctx context.Context, request web.R
 	return nil
 
 }
+
+func (service *AuthServiceImpl) ChangePassword(ctx context.Context, request web.ResetPasswordRequest, id int) error {
+	err := service.Validate.Struct(request)
+	if err != nil {
+		return err
+	}
+	err = service.Validate.Var(id, "required,number")
+	if err != nil {
+		return err
+	}
+
+	tx, err := service.DB.Begin()
+	if err != nil {
+		log.Println("Error starting transaction:", err)
+		return err
+	}
+	defer helper.CommitOrRollback(tx)
+
+	err = service.Repository.ChangePassword(ctx, tx, request.NewPassword, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

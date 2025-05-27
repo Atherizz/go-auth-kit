@@ -175,3 +175,23 @@ func (repo *AuthRepositoryImpl) ResetPassword(ctx context.Context, tx *sql.Tx, n
 
 	return nil
 }
+
+func (repo *AuthRepositoryImpl) ChangePassword(ctx context.Context, tx *sql.Tx, newPassword string, id int) error {
+	script := "UPDATE users SET password_hash = (?) WHERE id = (?)"
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	helper.PanicError(err)
+	hashedString := string(hashedPassword)
+
+	result, err := tx.ExecContext(ctx, script,hashedString, id)
+	if err != nil {
+		return err
+	}
+	row, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if row == 0 {
+		return errors.New("no row affected")
+	}
+	return nil
+}

@@ -14,4 +14,5 @@ type AuthRepository interface {
 	ResendVerifyToken(ctx context.Context, tx *sql.Tx, email string) (entity.User,error)
 	ForgotPassword(ctx context.Context, tx *sql.Tx, email string) (entity.User,error)
  	ResetPassword(ctx context.Context, tx *sql.Tx, newPassword string, token string) error
+	ChangePassword(ctx context.Context, tx *sql.Tx, newPassword string, id int) error
 }
