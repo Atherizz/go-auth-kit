@@ -2,7 +2,6 @@ package app
 
 import (
 	"database/sql"
-	apihelper "golang-restful-api/api-helper"
 	"golang-restful-api/controller"
 	"golang-restful-api/exception"
 	"golang-restful-api/middleware"
@@ -16,10 +15,9 @@ import (
 
 func NewRouter(categoryControllers, userControllers controller.EntityController[web.EntityRequest, entity.NamedEntity, web.EntityResponse], authController controller.AuthController, recipeControllers controller.RecipeController, homeController controller.HomeController, db *sql.DB) *httprouter.Router {
 	router := httprouter.New()
-	apiKeyMiddleware := middleware.NewApiKeyAuthMiddleware(router)
 
 	router.POST("/api/register", authController.Register)
-	router.GET("/api/verify-email", apihelper.SecureApi(*apiKeyMiddleware,authController.VerifyUser, "/api/verify-email"))
+	router.GET("/api/verify-email", authController.VerifyUser)
 	router.POST("/api/login", authController.Login)
 	router.POST("/api/resend-verification", authController.ResendVerifyToken)
 	router.POST("/api/forgot-password", authController.ForgotPassword)

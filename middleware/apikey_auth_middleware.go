@@ -4,7 +4,6 @@ import (
 	"golang-restful-api/model/helper"
 	"golang-restful-api/model/web"
 	"net/http"
-	"strings"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -19,35 +18,20 @@ func NewApiKeyAuthMiddleware(handler http.Handler) *ApiKeyAuthMiddleware {
 	}
 }
 
-func (middleware ApiKeyAuthMiddleware) Wrap(next httprouter.Handle) httprouter.Handle {
-	return func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-	key := "password"
-	if strings.HasPrefix(request.URL.Path, "/api/") {
-	if key != request.Header.Get("X-API-KEY") {
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusUnauthorized)
+func (m *ApiKeyAuthMiddleware) WrapRouter(router *httprouter.Router) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		apiKey := r.Header.Get("X-API-KEY")
+		if apiKey != "password" {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
 
-		webResponse := web.WebResponse{
-			Code:   http.StatusUnauthorized,
-			Status: "Unauthorized",
+			webResponse := web.WebResponse{
+				Code:   http.StatusUnauthorized,
+				Status: "Unauthorized",
+			}
+			helper.WriteEncodeResponse(w, webResponse)
+			return
 		}
-		helper.WriteEncodeResponse(writer, webResponse)
-	} 
-	
-	next(writer,request,params)
-	}
-
+		router.ServeHTTP(w, r)
+	})
 }
-}
-
-// func RecoveryMiddleware(next http.Handler) http.Handler {
-// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		defer func() {
-// 			if err := recover(); err != nil {
-// 				http.Error(w, fmt.Sprintf("Internal Server Error: %v", err), http.StatusInternalServerError)
-// 				log.Printf("Panic recovered: %v\n", err)
-// 			}
-// 		}()
-// 		next.ServeHTTP(w, r)
-// 	})
-// }

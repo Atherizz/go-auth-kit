@@ -1,6 +1,7 @@
 package main
 
 import (
+	apihelper "golang-restful-api/api-helper"
 	"golang-restful-api/app"
 	"golang-restful-api/controller"
 	"golang-restful-api/middleware"
@@ -50,10 +51,12 @@ func main() {
 
 	router := app.NewRouter(categoryController, userController, loginController, recipeController,homeController, db)
 	apiKeyMiddleware := middleware.NewApiKeyAuthMiddleware(router)
+
+	secureApi := apihelper.SecureApi(*apiKeyMiddleware, router, "/api/verify-email", "/home", "/callback")
 	
 	server := http.Server{
 		Addr:    "localhost:8000",
-		Handler: apiKeyMiddleware.Handler,
+		Handler: secureApi,
 	}
 	err := server.ListenAndServe()
 	helper.PanicError(err)
