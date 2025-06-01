@@ -8,6 +8,7 @@ import (
 	"golang-restful-api/model/repository"
 	"golang-restful-api/model/web"
 	"log"
+	"net/smtp"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -46,7 +47,6 @@ func (service *AuthServiceImpl) CheckCredentials(ctx context.Context, request we
 	}
 	userResponse := helper.ToUserResponse(user)
 
-
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
 	if err != nil {
 		return web.LoginResponse{}, err
@@ -80,7 +80,7 @@ func (service *AuthServiceImpl) GetByColumn(ctx context.Context, data string, co
 	}
 	defer helper.CommitOrRollback(tx)
 
-	user, err := service.Repository.GetByColumn(ctx,tx,data,column)
+	user, err := service.Repository.GetByColumn(ctx, tx, data, column)
 	if err != nil {
 		return web.UserResponse{}, err
 	}
@@ -125,11 +125,26 @@ func (service *AuthServiceImpl) Register(ctx context.Context, request web.UserRe
 		Email:       request.Email,
 		Password:    request.Password,
 		VerifyToken: token,
-		ExpiredAt: time.Now().Add(15 * time.Minute),
+		ExpiredAt:   time.Now().Add(15 * time.Minute),
 	}
 
 	user = service.Repository.Register(ctx, tx, user)
 
+	auth := smtp.PlainAuth(
+		"",
+		"saveroathallah86@gmail.com",
+		"qigkqalqvyaejjxk",
+		"smtp.gmail.com",
+	)
+
+	msg := "Click here to verify your account\n" + "http://localhost:8000/api/verify-email?token="+token
+	smtp.SendMail(
+		"smtp.gmail.com:587",
+		auth,
+		"saveroathallah86@gmail.com",
+		[]string{request.Email},
+		[]byte(msg),
+	)
 
 	return helper.ToUserResponse(user)
 
@@ -137,7 +152,7 @@ func (service *AuthServiceImpl) Register(ctx context.Context, request web.UserRe
 
 func (service *AuthServiceImpl) SetVerified(ctx context.Context, token string) (web.UserResponse, error) {
 	err := service.Validate.Var(token, "required,min=1")
-	if err != nil { 
+	if err != nil {
 		log.Println("Validation error:", err)
 		return web.UserResponse{}, err
 	}
@@ -158,7 +173,7 @@ func (service *AuthServiceImpl) SetVerified(ctx context.Context, token string) (
 	return helper.ToUserResponse(user), nil
 }
 
-func (service *AuthServiceImpl) ResendVerifyToken(ctx context.Context, email string) (web.VerifyTokenResponse,error) {
+func (service *AuthServiceImpl) ResendVerifyToken(ctx context.Context, email string) (web.VerifyTokenResponse, error) {
 	err := service.Validate.Var(email, "required,email")
 	if err != nil {
 		return web.VerifyTokenResponse{}, err
@@ -171,7 +186,7 @@ func (service *AuthServiceImpl) ResendVerifyToken(ctx context.Context, email str
 	}
 	defer helper.CommitOrRollback(tx)
 
-	user, err := service.Repository.ResendVerifyToken(ctx,tx,email)
+	user, err := service.Repository.ResendVerifyToken(ctx, tx, email)
 	if err != nil {
 		return web.VerifyTokenResponse{}, err
 	}
@@ -179,7 +194,7 @@ func (service *AuthServiceImpl) ResendVerifyToken(ctx context.Context, email str
 	return helper.ToVerifyTokenResponse(user), nil
 }
 
-func (service *AuthServiceImpl) ForgotPassword(ctx context.Context, email string) (web.ResetTokenResponse,error) {
+func (service *AuthServiceImpl) ForgotPassword(ctx context.Context, email string) (web.ResetTokenResponse, error) {
 	err := service.Validate.Var(email, "required,email")
 	if err != nil {
 		return web.ResetTokenResponse{}, err
@@ -192,7 +207,7 @@ func (service *AuthServiceImpl) ForgotPassword(ctx context.Context, email string
 	}
 	defer helper.CommitOrRollback(tx)
 
-	user, err := service.Repository.ForgotPassword(ctx,tx,email)
+	user, err := service.Repository.ForgotPassword(ctx, tx, email)
 	if err != nil {
 		return web.ResetTokenResponse{}, err
 	}
