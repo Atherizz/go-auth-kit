@@ -137,7 +137,7 @@ func (service *AuthServiceImpl) Register(ctx context.Context, request web.UserRe
 		"smtp.gmail.com",
 	)
 
-	msg := "Click here to verify your account\n" + "http://localhost:8000/api/verify-email?token="+token
+	msg := "Click here to verify your account\n" + "http://localhost:8000/api/verify-email?token=" + token
 	smtp.SendMail(
 		"smtp.gmail.com:587",
 		auth,

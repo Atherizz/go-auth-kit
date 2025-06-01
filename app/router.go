@@ -2,6 +2,7 @@ package app
 
 import (
 	"database/sql"
+	apihelper "golang-restful-api/api-helper"
 	"golang-restful-api/controller"
 	"golang-restful-api/exception"
 	"golang-restful-api/middleware"
@@ -13,19 +14,24 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func NewRouter(categoryControllers, userControllers controller.EntityController[web.EntityRequest, entity.NamedEntity, web.EntityResponse], authController controller.AuthController, recipeControllers controller.RecipeController, db *sql.DB) *httprouter.Router {
+func NewRouter(categoryControllers, userControllers controller.EntityController[web.EntityRequest, entity.NamedEntity, web.EntityResponse], authController controller.AuthController, recipeControllers controller.RecipeController, homeController controller.HomeController, db *sql.DB) *httprouter.Router {
 	router := httprouter.New()
+	apiKeyMiddleware := middleware.NewApiKeyAuthMiddleware(router)
 
 	router.POST("/api/register", authController.Register)
-	router.GET("/api/verify-email", authController.VerifyUser)
+	router.GET("/api/verify-email", apihelper.SecureApi(*apiKeyMiddleware,authController.VerifyUser, "/api/verify-email"))
 	router.POST("/api/login", authController.Login)
-	router.POST("/api/resend-verification",authController.ResendVerifyToken)
-	router.POST("/api/forgot-password",authController.ForgotPassword)
-	router.POST("/api/reset-password",authController.ResetPassword)
+	router.POST("/api/resend-verification", authController.ResendVerifyToken)
+	router.POST("/api/forgot-password", authController.ForgotPassword)
+	router.POST("/api/reset-password", authController.ResetPassword)
 
-	jwtMiddleware := middleware.NewJwtAuthMiddleware(router,db)
-	adminMiddleware := middleware.NewAdminAuthMiddleware(router,db)
+	jwtMiddleware := middleware.NewJwtAuthMiddleware(router, db)
+	adminMiddleware := middleware.NewAdminAuthMiddleware(router, db)
 	checkUserMiddleware := middleware.NewCheckUserMiddleware(router)
+	oauthMiddleware := middleware.NewOauth2Middleware(router)
+	
+	router.GET("/home", oauthMiddleware.Wrap(homeController.HomeOauth))
+	router.GET("/callback", homeController.Callback)
 
 	router.GET("/api/categories", jwtMiddleware.Wrap(categoryControllers.FindAll))
 	router.GET("/api/categories/:entityId", jwtMiddleware.Wrap(categoryControllers.FindById))
@@ -37,7 +43,7 @@ func NewRouter(categoryControllers, userControllers controller.EntityController[
 	router.GET("/api/users/:entityId", jwtMiddleware.Wrap(userControllers.FindById))
 	router.PUT("/api/users/:entityId", jwtMiddleware.Wrap(checkUserMiddleware.Wrap(userControllers.Update)))
 	router.DELETE("/api/users/:entityId", jwtMiddleware.Wrap(checkUserMiddleware.Wrap(userControllers.Delete)))
-	router.POST("/api/change-password",jwtMiddleware.Wrap(authController.ChangePassword))
+	router.POST("/api/change-password", jwtMiddleware.Wrap(authController.ChangePassword))
 
 	router.GET("/api/recipes", jwtMiddleware.Wrap(recipeControllers.FindAll))
 	router.GET("/api/recipes/:recipeId", jwtMiddleware.Wrap(recipeControllers.FindById))

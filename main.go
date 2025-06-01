@@ -46,12 +46,14 @@ func main() {
 	recipeService := service.NewRecipeService(recipeRepository,db,validate)
 	recipeController := controller.NewRecipeController(recipeService)
 
-	router := app.NewRouter(categoryController, userController, loginController, recipeController, db)
+	homeController := controller.NewHomeController()
+
+	router := app.NewRouter(categoryController, userController, loginController, recipeController,homeController, db)
 	apiKeyMiddleware := middleware.NewApiKeyAuthMiddleware(router)
 	
 	server := http.Server{
 		Addr:    "localhost:8000",
-		Handler: apiKeyMiddleware,
+		Handler: apiKeyMiddleware.Handler,
 	}
 	err := server.ListenAndServe()
 	helper.PanicError(err)

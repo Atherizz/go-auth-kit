@@ -4,6 +4,9 @@ import (
 	"golang-restful-api/model/helper"
 	"golang-restful-api/model/web"
 	"net/http"
+	"strings"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 type ApiKeyAuthMiddleware struct {
@@ -16,11 +19,11 @@ func NewApiKeyAuthMiddleware(handler http.Handler) *ApiKeyAuthMiddleware {
 	}
 }
 
-func (middleware ApiKeyAuthMiddleware) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+func (middleware ApiKeyAuthMiddleware) Wrap(next httprouter.Handle) httprouter.Handle {
+	return func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	key := "password"
-	if key == request.Header.Get("X-API-KEY") {
-		middleware.Handler.ServeHTTP(writer, request)
-	} else {
+	if strings.HasPrefix(request.URL.Path, "/api/") {
+	if key != request.Header.Get("X-API-KEY") {
 		writer.Header().Set("Content-Type", "application/json")
 		writer.WriteHeader(http.StatusUnauthorized)
 
@@ -29,8 +32,12 @@ func (middleware ApiKeyAuthMiddleware) ServeHTTP(writer http.ResponseWriter, req
 			Status: "Unauthorized",
 		}
 		helper.WriteEncodeResponse(writer, webResponse)
-
+	} 
+	
+	next(writer,request,params)
 	}
+
+}
 }
 
 // func RecoveryMiddleware(next http.Handler) http.Handler {
