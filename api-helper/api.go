@@ -7,7 +7,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func SecureApi(middleware middleware.ApiKeyAuthMiddleware, router *httprouter.Router, except ...string) http.Handler {
+func SecureRoute(middleware middleware.ApiKeyAuthMiddleware, router *httprouter.Router, except ...string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		for _, e := range except {
 			if r.URL.Path == e {
@@ -15,8 +15,6 @@ func SecureApi(middleware middleware.ApiKeyAuthMiddleware, router *httprouter.Ro
 				return
 			}
 		}
-
-
 		middleware.WrapRouter(router).ServeHTTP(w, r)
 	})
 }

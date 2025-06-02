@@ -47,16 +47,16 @@ func main() {
 	recipeService := service.NewRecipeService(recipeRepository,db,validate)
 	recipeController := controller.NewRecipeController(recipeService)
 
-	homeController := controller.NewHomeController()
 
-	router := app.NewRouter(categoryController, userController, loginController, recipeController,homeController, db)
+
+	router := app.NewRouter(categoryController, userController, loginController, recipeController, db)
 	apiKeyMiddleware := middleware.NewApiKeyAuthMiddleware(router)
 
-	secureApi := apihelper.SecureApi(*apiKeyMiddleware, router, "/api/verify-email", "/home", "/callback")
-	
+	secureRoute := apihelper.SecureRoute(*apiKeyMiddleware, router, "/api/verify-email",)
+
 	server := http.Server{
-		Addr:    "localhost:8000",
-		Handler: secureApi,
+		Addr:    "localhost:8080",
+		Handler: secureRoute,
 	}
 	err := server.ListenAndServe()
 	helper.PanicError(err)

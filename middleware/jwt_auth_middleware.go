@@ -51,7 +51,6 @@ func (m *JwtAuthMiddlewareImpl) Wrap(next httprouter.Handle) httprouter.Handle {
 		}
 
 		userID := int(claims["id"].(float64))
-
 		userRepo := repository.NewAuthRepository()
 
 		tx, err := m.DB.Begin()

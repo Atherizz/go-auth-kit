@@ -13,7 +13,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func NewRouter(categoryControllers, userControllers controller.EntityController[web.EntityRequest, entity.NamedEntity, web.EntityResponse], authController controller.AuthController, recipeControllers controller.RecipeController, homeController controller.HomeController, db *sql.DB) *httprouter.Router {
+func NewRouter(categoryControllers, userControllers controller.EntityController[web.EntityRequest, entity.NamedEntity, web.EntityResponse], authController controller.AuthController, recipeControllers controller.RecipeController, db *sql.DB) *httprouter.Router {
 	router := httprouter.New()
 
 	router.POST("/api/register", authController.Register)
@@ -26,10 +26,6 @@ func NewRouter(categoryControllers, userControllers controller.EntityController[
 	jwtMiddleware := middleware.NewJwtAuthMiddleware(router, db)
 	adminMiddleware := middleware.NewAdminAuthMiddleware(router, db)
 	checkUserMiddleware := middleware.NewCheckUserMiddleware(router)
-	oauthMiddleware := middleware.NewOauth2Middleware(router)
-	
-	router.GET("/home", oauthMiddleware.Wrap(homeController.HomeOauth))
-	router.GET("/callback", homeController.Callback)
 
 	router.GET("/api/categories", jwtMiddleware.Wrap(categoryControllers.FindAll))
 	router.GET("/api/categories/:entityId", jwtMiddleware.Wrap(categoryControllers.FindById))
