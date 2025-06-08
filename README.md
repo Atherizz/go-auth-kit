@@ -1,1 +1,1 @@
-A simple RESTful API built with Go that implements JWT-based authentication
+A simple RESTful API for meal plan app built with Go that implements JWT-based authentication
